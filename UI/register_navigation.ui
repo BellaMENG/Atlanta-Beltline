@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Regster_Navigation</class>
+ <widget class="QDialog" name="Regster_Navigation">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>431</width>
+    <height>444</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Register Navigation</string>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>120</y>
+     <width>271</width>
+     <height>271</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPushButton" name="user_btn">
+      <property name="text">
+       <string>User Only</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="visitor_btn">
+      <property name="text">
+       <string>Visitor Only</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="employee_btn">
+      <property name="text">
+       <string>Employee Only</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="employee_visitor_btn">
+      <property name="text">
+       <string>Employee-Visitor</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="back_btn">
+      <property name="text">
+       <string>Back</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>40</y>
+     <width>331</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>STIX</family>
+     <pointsize>26</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Register Navigation</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
