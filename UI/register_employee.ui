@@ -311,29 +311,6 @@
     <string>Email</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="add_btn">
-   <property name="geometry">
-    <rect>
-     <x>490</x>
-     <y>460</y>
-     <width>80</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Add</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEdit">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>460</y>
-     <width>231</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
@@ -369,6 +346,31 @@
    <property name="text">
     <string>Register</string>
    </property>
+  </widget>
+  <widget class="QWidget" name="gridLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>450</y>
+     <width>321</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="spacing">
+     <number>20</number>
+    </property>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="add_btn">
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLineEdit" name="lineEdit"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>
