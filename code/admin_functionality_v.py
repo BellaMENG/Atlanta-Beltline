@@ -112,6 +112,7 @@ class Ui_admin_functionality_v(object):
         self.view_visit_history_btn.setText(_translate("admin_functionality_v", "View Visit History"))
         self.back_btn.setText(_translate("admin_functionality_v", "Back"))
         self.label.setText(_translate("admin_functionality_v", "Administrator Functionality"))
+        
         self.manage_profile_btn.clicked.connect(lambda:self.func(17))
         self.manage_transit_btn.clicked.connect(lambda:self.func(22))
         self.manage_site_btn.clicked.connect(lambda:self.func(19))

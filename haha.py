@@ -1,76 +1,129 @@
-# -*- coding: utf-8 -*-
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+import pandas as pd
+import operator
 
-# Form implementation generated from reading ui file 'user_login.ui'
-#
-# Created by: PyQt5 UI code generator 5.6
-#
-# WARNING! All changes made in this file will be lost!
+# This class was generated from the Qt Creator
+class Ui_tableView_ex(object):
+    def setupUi(self, tableView_ex):
+        tableView_ex.setObjectName("tableView_ex")
+        tableView_ex.resize(800, 600)
+        self.centralwidget = QWidget(tableView_ex)
+        self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout = QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
+        self.myTable = QTableView(self.centralwidget)
+        self.myTable.setObjectName("monTablo")
+        self.gridLayout.addWidget(self.myTable, 0, 0, 1, 1)
+        tableView_ex.setCentralWidget(self.centralwidget)
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+        self.retranslateUi(tableView_ex)
+        QMetaObject.connectSlotsByName(tableView_ex)
 
-class Ui_UserLogin(object):
-    def setupUi(self, UserLogin):
-        UserLogin.setObjectName("UserLogin")
-        UserLogin.resize(427, 300)
-        self.pushButton = QtWidgets.QPushButton(UserLogin)
-        self.pushButton.setGeometry(QtCore.QRect(30, 250, 101, 31))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton_2 = QtWidgets.QPushButton(UserLogin)
-        self.pushButton_2.setGeometry(QtCore.QRect(310, 250, 91, 31))
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.lineEdit = QtWidgets.QLineEdit(UserLogin)
-        self.lineEdit.setGeometry(QtCore.QRect(140, 130, 251, 23))
-        self.lineEdit.setObjectName("lineEdit")
-        self.lineEdit_2 = QtWidgets.QLineEdit(UserLogin)
-        self.lineEdit_2.setGeometry(QtCore.QRect(140, 180, 251, 23))
-        self.lineEdit_2.setObjectName("lineEdit_2")
-        self.label = QtWidgets.QLabel(UserLogin)
-        self.label.setGeometry(QtCore.QRect(30, 130, 57, 15))
-        font = QtGui.QFont()
-        font.setFamily("STIX")
-        font.setPointSize(14)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label.setFont(font)
-        self.label.setObjectName("label")
-        self.label_2 = QtWidgets.QLabel(UserLogin)
-        self.label_2.setGeometry(QtCore.QRect(20, 180, 81, 20))
-        font = QtGui.QFont()
-        font.setFamily("STIX")
-        font.setPointSize(14)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_2.setFont(font)
-        self.label_2.setObjectName("label_2")
-        self.label_3 = QtWidgets.QLabel(UserLogin)
-        self.label_3.setGeometry(QtCore.QRect(50, 50, 351, 41))
-        font = QtGui.QFont()
-        font.setFamily("STIX")
-        font.setPointSize(26)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_3.setFont(font)
-        self.label_3.setObjectName("label_3")
-
-        self.retranslateUi(UserLogin)
-        QtCore.QMetaObject.connectSlotsByName(UserLogin)
-
-    def retranslateUi(self, UserLogin):
-        _translate = QtCore.QCoreApplication.translate
-        UserLogin.setWindowTitle(_translate("UserLogin", "User Login"))
-        self.pushButton.setText(_translate("UserLogin", "Login"))
-        self.pushButton_2.setText(_translate("UserLogin", "Register"))
-        self.label.setText(_translate("UserLogin", "Email"))
-        self.label_2.setText(_translate("UserLogin", "Password"))
-        self.label_3.setText(_translate("UserLogin", "Atlanta Beltline Login"))
+    def retranslateUi(self, tableView_ex):
+        _translate = QCoreApplication.translate
+        tableView_ex.setWindowTitle(_translate("tableView_ex", "MainWindow"))
 
 
-if __name__ == "__main__":
+class TableTest(QMainWindow, Ui_tableView_ex):
+    def __init__(self, parent=None):
+        super(TableTest, self).__init__(parent)
+        self.setupUi(self)
+
+        self.model = TableModel()
+        self.myTable.setModel(self.model)
+        self.myTable.setShowGrid(False)
+
+        self.hView = HeaderView(self.myTable)
+        self.myTable.setHorizontalHeader(self.hView)
+        self.myTable.verticalHeader().hide()
+
+        # adding alternate colours
+        self.myTable.setAlternatingRowColors(True)
+        self.myTable.setStyleSheet("alternate-background-color: rgb(209, 209, 209)"
+                                   "; background-color: rgb(244, 244, 244);")
+
+        # self.myTable.setSortingEnabled(True)
+        # self.myTable.sortByColumn(1, Qt.AscendingOrder)
+
+
+class HeaderView(QHeaderView):
+    def __init__(self, parent):
+        QHeaderView.__init__(self, Qt.Horizontal, parent)
+        self.model = TableModel()
+        self.setModel(self.model)
+
+        # Setting font for headers only
+        self.font = QFont("Helvetica", 12)
+        self.setFont(self.font)
+
+        # Changing section backgroud color. font color and font weight
+        self.setStyleSheet("::section{background-color: pink; color: green; font-weight: bold}")
+
+        self.setSectionResizeMode(1)
+        self.setSectionsClickable(True)
+
+
+class TableModel(QAbstractTableModel):
+
+    def __init__(self):
+        QAbstractTableModel.__init__(self)
+        super(TableModel, self).__init__()
+
+        self.headers = ["Name", "Age", "Grades"]
+        self.stocks = [["George", "26", "80%"],
+                       ["Bob", "16", "95%"],
+                       ["Martha", "22", "98%"]]
+        self.data = pd.DataFrame(self.stocks, columns=self.headers)
+
+    def update(self, in_data):
+        self.data = in_data
+
+    def rowCount(self, parent=None):
+        return len(self.data.index)
+
+    def columnCount(self, parent=None):
+        return len(self.data.columns.values)
+
+    def setData(self, index, value, role=None):
+        if role == Qt.EditRole:
+            row = index.row()
+            col = index.column()
+            column = self.data.columns.values[col]
+            self.data.set_value(row, column, value)
+            self.update(self.data)
+            return True
+
+    def data(self, index, role=None):
+        if role == Qt.DisplayRole:
+            row = index.row()
+            col = index.column()
+            value = self.data.iloc[row, col]
+            return value
+
+    def headerData(self, section, orientation, role=None):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self.data.columns.values[section]
+
+# -----------------NOT WORKING!!!---------------
+# =================================================
+
+    def sort(self, Ncol, order):
+   	"""Sort table by given column number."""
+   	self.layoutAboutToBeChanged.emit()
+   	self.data = self.data.sort_values(self.headers[Ncol],
+                                      ascending=order == Qt.AscendingOrder)
+    	self.layoutChanged.emit()
+# =================================================
+
+
+if __name__ == '__main__':
     import sys
-    app = QtWidgets.QApplication(sys.argv)
-    UserLogin = QtWidgets.QMainWindow()
-    ui = Ui_UserLogin()
-    ui.setupUi(UserLogin)
-    UserLogin.show()
-    sys.exit(app.exec_())
-
+    app = QApplication(sys.argv)
+    app.setStyle(QStyleFactory.create("Fusion"))
+    main_window = TableTest()
+    main_window.show()
+    app.exec_()
+    sys.exit()

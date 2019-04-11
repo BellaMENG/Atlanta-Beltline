@@ -118,4 +118,3 @@ if __name__ == "__main__":
     ui.setupUi(admin_functionality)
     admin_functionality.show()
     sys.exit(app.exec_())
-
