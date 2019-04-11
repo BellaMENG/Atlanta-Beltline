@@ -209,12 +209,12 @@
      <string>Back</string>
     </property>
    </widget>
-   <widget class="QTableView" name="tableView">
+   <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>110</x>
       <y>240</y>
-      <width>601</width>
+      <width>551</width>
       <height>251</height>
      </rect>
     </property>
