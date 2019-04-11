@@ -1,0 +1,221 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'employee_manage_profile.ui'
+#
+# Created by: PyQt5 UI code generator 5.6
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+from helper import isValidPhone, isValidEmail
+from PyQt5.QtWidgets import QMessageBox
+class Ui_employee_manage_profile(object):
+    def setupUi(self, employee_manage_profile):
+        employee_manage_profile.setObjectName("employee_manage_profile")
+        employee_manage_profile.resize(800, 694)
+        self.centralwidget = QtWidgets.QWidget(employee_manage_profile)
+        self.centralwidget.setObjectName("centralwidget")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(250, 10, 271, 61))
+        font = QtGui.QFont()
+        font.setPointSize(26)
+        self.label.setFont(font)
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(self.centralwidget)
+        self.label_2.setGeometry(QtCore.QRect(80, 100, 101, 31))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_2.setFont(font)
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setGeometry(QtCore.QRect(440, 100, 111, 31))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_3.setFont(font)
+        self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        self.label_4.setGeometry(QtCore.QRect(80, 160, 141, 31))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_4.setFont(font)
+        self.label_4.setObjectName("label_4")
+        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        self.label_5.setGeometry(QtCore.QRect(440, 160, 111, 31))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_5.setFont(font)
+        self.label_5.setObjectName("label_5")
+        self.label_6 = QtWidgets.QLabel(self.centralwidget)
+        self.label_6.setGeometry(QtCore.QRect(80, 220, 121, 21))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_6.setFont(font)
+        self.label_6.setObjectName("label_6")
+        self.label_7 = QtWidgets.QLabel(self.centralwidget)
+        self.label_7.setGeometry(QtCore.QRect(440, 220, 81, 21))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_7.setFont(font)
+        self.label_7.setObjectName("label_7")
+        self.first_name_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        self.first_name_lineEdit.setGeometry(QtCore.QRect(200, 102, 131, 21))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.first_name_lineEdit.setFont(font)
+        self.first_name_lineEdit.setObjectName("first_name_lineEdit")
+        self.last_name_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        self.last_name_lineEdit.setGeometry(QtCore.QRect(580, 100, 131, 23))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.last_name_lineEdit.setFont(font)
+        self.last_name_lineEdit.setObjectName("last_name_lineEdit")
+        self.user_name_label = QtWidgets.QLabel(self.centralwidget)
+        self.user_name_label.setGeometry(QtCore.QRect(210, 170, 191, 16))
+        font = QtGui.QFont()
+        font.setFamily("STIX")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.user_name_label.setFont(font)
+        self.user_name_label.setObjectName("user_name_label")
+        self.site_name_label = QtWidgets.QLabel(self.centralwidget)
+        self.site_name_label.setGeometry(QtCore.QRect(570, 165, 191, 21))
+        font = QtGui.QFont()
+        font.setFamily("STIX")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.site_name_label.setFont(font)
+        self.site_name_label.setObjectName("site_name_label")
+        self.employee_id_label = QtWidgets.QLabel(self.centralwidget)
+        self.employee_id_label.setGeometry(QtCore.QRect(220, 220, 171, 20))
+        font = QtGui.QFont()
+        font.setFamily("STIX")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.employee_id_label.setFont(font)
+        self.employee_id_label.setObjectName("employee_id_label")
+        self.phone_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        self.phone_lineEdit.setGeometry(QtCore.QRect(580, 220, 150, 23))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.phone_lineEdit.setFont(font)
+        self.phone_lineEdit.setObjectName("phone_lineEdit")
+        self.label_8 = QtWidgets.QLabel(self.centralwidget)
+        self.label_8.setGeometry(QtCore.QRect(80, 275, 91, 21))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_8.setFont(font)
+        self.label_8.setObjectName("label_8")
+        self.address_label = QtWidgets.QLabel(self.centralwidget)
+        self.address_label.setGeometry(QtCore.QRect(210, 276, 581, 20))
+        font = QtGui.QFont()
+        font.setFamily("STIX")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.address_label.setFont(font)
+        self.address_label.setObjectName("address_label")
+        self.label_9 = QtWidgets.QLabel(self.centralwidget)
+        self.label_9.setGeometry(QtCore.QRect(80, 330, 81, 16))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_9.setFont(font)
+        self.label_9.setObjectName("label_9")
+        self.visitor_account_checkBox = QtWidgets.QCheckBox(self.centralwidget)
+        self.visitor_account_checkBox.setGeometry(QtCore.QRect(80, 580, 171, 41))
+        font = QtGui.QFont()
+        font.setFamily("Sawasdee")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.visitor_account_checkBox.setFont(font)
+        self.visitor_account_checkBox.setObjectName("visitor_account_checkBox")
+        self.update_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.update_btn.setGeometry(QtCore.QRect(80, 630, 121, 51))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.update_btn.setFont(font)
+        self.update_btn.setObjectName("update_btn")
+        self.back_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.back_btn.setGeometry(QtCore.QRect(580, 630, 121, 51))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.back_btn.setFont(font)
+        self.back_btn.setObjectName("back_btn")
+        employee_manage_profile.setCentralWidget(self.centralwidget)
+
+        self.retranslateUi(employee_manage_profile)
+        QtCore.QMetaObject.connectSlotsByName(employee_manage_profile)
+
+    def retranslateUi(self, employee_manage_profile):
+        _translate = QtCore.QCoreApplication.translate
+        employee_manage_profile.setWindowTitle(_translate("employee_manage_profile", "Employee Manage Profile"))
+        self.label.setText(_translate("employee_manage_profile", "Manage Profile"))
+        self.label_2.setText(_translate("employee_manage_profile", "First Name"))
+        self.label_3.setText(_translate("employee_manage_profile", "Last Name"))
+        self.label_4.setText(_translate("employee_manage_profile", "User Name"))
+        self.label_5.setText(_translate("employee_manage_profile", "Site Name"))
+        self.label_6.setText(_translate("employee_manage_profile", "Employee ID"))
+        self.label_7.setText(_translate("employee_manage_profile", "Phone"))
+        self.user_name_label.setText(_translate("employee_manage_profile", "TextLabel"))
+        self.site_name_label.setText(_translate("employee_manage_profile", "TextLabel"))
+        self.employee_id_label.setText(_translate("employee_manage_profile", "TextLabel"))
+        self.label_8.setText(_translate("employee_manage_profile", "Address"))
+        self.address_label.setText(_translate("employee_manage_profile", "TextLabel"))
+        self.label_9.setText(_translate("employee_manage_profile", "Email"))
+        self.visitor_account_checkBox.setText(_translate("employee_manage_profile", "Visitor Account"))
+        self.update_btn.setText(_translate("employee_manage_profile", "Update"))
+        self.back_btn.setText(_translate("employee_manage_profile", "Back"))
+
+        self.initInfo()
+        self.update_btn.clicked.connect(self.update)
+
+    def initInfo(self):
+        #
+        _translate = QtCore.QCoreApplication.translate
+        first_name,last_name,user_name,site_name,employee_id,phone,address = ['Clara','Wilson','cwison','Inman Park','123456789','123-123-1234','100 East Main Street']
+        self.user_name_label.setText(_translate("employee_manage_profile", user_name))
+        self.site_name_label.setText(_translate("employee_manage_profile", site_name))
+        self.employee_id_label.setText(_translate("employee_manage_profile", employee_id))
+        self.address_label.setText(_translate("employee_manage_profile", address))
+        self.first_name_lineEdit.setText(first_name)
+        self.last_name_lineEdit.setText(last_name)
+        self.phone_lineEdit.setText(phone)
+
+    def update(self):
+        first_name = self.first_name_lineEdit.text()
+        last_name = self.last_name_lineEdit.text()
+        phone = self.phone_lineEdit.text()
+        is_visitor_account = self.visitor_account_checkBox.isChecked()
+        if not isValidPhone(phone):
+            QMessageBox.warning(self.centralwidget, 
+                                    "Invalid Information", 
+                                    "Invalid Phone Number: %s"%(phone), 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return 
+
+        if not first_name or not last_name or not phone:
+            QMessageBox.warning(self.centralwidget, 
+                                    "Invalid Information", 
+                                    "All fileds required!", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return 
+        print(first_name)
+        print(last_name)
+        print(phone)
+        print(is_visitor_account)
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    employee_manage_profile = QtWidgets.QMainWindow()
+    ui = Ui_employee_manage_profile()
+    ui.setupUi(employee_manage_profile)
+    employee_manage_profile.show()
+    sys.exit(app.exec_())
+

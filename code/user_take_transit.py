@@ -103,7 +103,13 @@ class Ui_user_take_transit(object):
 
         self.tableWidget.setColumnCount(5)
         self.tableWidget.setHorizontalHeaderLabels(['Selected','Route','Transport Type','Price','# Connected Sites'])
-        self.tableWidget.horizontalHeader().setSectionResizeMode(4,QHeaderView.Stretch)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(2,QHeaderView.ResizeToContents)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeToContents)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(4,QHeaderView.ResizeToContents)
+
+        
     def retranslateUi(self, user_take_transit):
         _translate = QtCore.QCoreApplication.translate
         user_take_transit.setWindowTitle(_translate("user_take_transit", "User Take Transit"))
@@ -117,7 +123,7 @@ class Ui_user_take_transit(object):
         self.label_6.setText(_translate("user_take_transit", "Transit Date"))
         self.log_transit_btn.setText(_translate("user_take_transit", "Log Transit"))
 
-        type_list = ['MARTA','Bus','Bike']
+        type_list = ['--ALL--','MARTA','Bus','Bike']
         self.transport_type_combobox.addItems(type_list)
 
         self.filter_btn.clicked.connect(self.add_line)
