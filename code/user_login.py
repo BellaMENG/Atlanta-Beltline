@@ -6,9 +6,15 @@
 #
 # WARNING! All changes made in this file will be lost!
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
 import __main__
-from __main__ import connection_pool
+import mysql.connector
+from PyQt5 import QtCore, QtGui, QtWidgets
+from mysql.connector import pooling
+from helper import isValidEmail
+from PyQt5.QtWidgets import QMessageBox
+
+
+#from __main__ import connection_pool
 
 app = QtWidgets.QApplication(sys.argv)
 
@@ -74,27 +80,52 @@ class Ui_UserLogin(object):
     def login(self):
         pwd = self.lineEdit_2.text()
         email = self.lineEdit.text()
+        if not isValidEmail(email):
+            QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "Invalid email!", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
         #TODO: SQL query to search for the user with email and password in the database
-        query1 = None
-        connection_object = connection_pool.get_connection()
+        query1 = "SELECT Username FROM emails WHERE Email = \'" + email + "\';"
+        connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ",info)
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
         else:
             print("user_login.py login() Not Connected ")
         cursor = connection_object.cursor()
         cursor.execute(query1)
         result = cursor.fetchall()
+        ############################
+        if len(result) == 0:
+            QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "Email Does Not Exist!", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+            print("MySQL connection is closed")
+            return
+        user_name = result[0][0]
+        query1 = "SELECT Password,UserType FROM user WHERE Username = \'" + user_name + "\';"
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        password = result[0][0]
+        user_type = result[0][1]
+        exist = False
+        if password == pwd:
+            exist = True
         if(connection_object.is_connected()):
             cursor.close()
             connection_object.close()
             print("MySQL connection is closed")
         ############################
-        #TODO: identyfy user
 
-        ############################
-
-        function_screens = { "user": 7,
+        function_screens = { "User": 7,
                             "admin": 8,
                             "admin_visitor":9,
                             "manager":10,
@@ -105,7 +136,7 @@ class Ui_UserLogin(object):
         if exist:
             __main__.logged_user = user_name
             __main__.user_type = user_type
-            __main__.screen = function_screens[user_type]
+            __main__.screen_number = function_screens[user_type]
             app.exit()
         else:
             QMessageBox.warning(self.label, 
@@ -115,10 +146,10 @@ class Ui_UserLogin(object):
                                     QMessageBox.Yes)
 
     def register(self):
-        __main__.screen = 2
+        __main__.screen_number = 2
         app.exit()
     
-def render()
+def render():
     UserLogin = QtWidgets.QMainWindow()
     ui = Ui_UserLogin()
     ui.setupUi(UserLogin)

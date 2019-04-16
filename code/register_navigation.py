@@ -8,8 +8,10 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
+import __main__
 
 app = QtWidgets.QApplication(sys.argv)
+
 class Ui_Regster_Navigation(object):
     def setupUi(self, Regster_Navigation):
         Regster_Navigation.setObjectName("Regster_Navigation")
@@ -61,10 +63,10 @@ class Ui_Regster_Navigation(object):
         self.visitor_btn.clicked.connect(lambda:self.func(idx=4))
         self.employee_btn.clicked.connect(lambda:self.func(idx=5))
         self.employee_visitor_btn.clicked.connect(lambda:self.func(idx=6))
-
+        self.back_btn.clicked.connect(lambda:self.func(idx=1))
 
     def func(self,idx):
-        __main__.screen = idx
+        __main__.screen_number = idx
         app.exit()
     
 def render():

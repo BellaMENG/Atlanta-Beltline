@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 import __main__
-from __main__ import connection_pool
+#from __main__ import connection_pool
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from helper import isValidEmail
