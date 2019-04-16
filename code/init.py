@@ -9,7 +9,7 @@ logged_user = None
 
 import user_login,register_navigation,register_user,register_visitor,register_employee,register_employee_v
 import user_functionality,admin_functionality,admin_functionality_v,manager_functionality,manager_functionality_v,staff_functionality,staff_functionality_v,visitor_functionality
-import user_take_transit
+import user_take_transit,user_transit_history
 if __name__ == "__main__":
     connection_pool = pooling.MySQLConnectionPool( pool_name = "beltline_pool",
                                                                    pool_size = 5,
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     #user_login.render()
     logged_user = 'cluah'
-    user_take_transit.render()
+    user_transit_history.render()
 
     while True:
         if screen_number == 1:

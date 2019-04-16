@@ -9,6 +9,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget,QHBoxLayout,QTableWidget,QPushButton,QApplication,QVBoxLayout,QTableWidgetItem,QCheckBox,QAbstractItemView,QHeaderView,QLabel,QFrame
 from PyQt5.QtCore import Qt
+import __main__
+import sys
+
+app = QtWidgets.QApplication(sys.argv)
+
 class Ui_user_transit_history(object):
     def setupUi(self, user_transit_history):
         user_transit_history.setObjectName("user_transit_history")
@@ -137,36 +142,92 @@ class Ui_user_transit_history(object):
         type_list = ['--ALL--','MARTA','Bus','Bike']
         self.transportTypeComboBox.addItems(type_list)
 
+        self.site_list = list()
+        self.get_sites()
+        self.containSiteComboBox.addItems(self.site_list)
+
         self.tableWidget.setColumnCount(4)
-        self.tableWidget.setHorizontalHeaderLabels(['          Date          ','          Route          ','               Transport Type          ','      Price      '])
+        self.tableWidget.setHorizontalHeaderLabels(['          Date           ','        Route        ','           Transport Type        ','      Price    '])
         self.tableWidget.horizontalHeader().setSectionResizeMode(0,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(2,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeToContents)
 
+        self.user_name = __main__.logged_user
         self.filter_btn.clicked.connect(self.filter)
 
+
     def filter(self):
+        self.tableWidget.setRowCount(0)
         contain_site = self.containSiteComboBox.currentText()
         transport_type = self.transportTypeComboBox.currentText()
         route = self.routeLineEdit.text()
         end_date = self.endDateDateEdit.date().toString(Qt.ISODate)
         start_date = self.startDateDateEdit.date().toString( Qt.ISODate)
-        print(contain_site)
-        print(transport_type)
-        print(start_date)
-        print(end_date)
-        print(route)
+        if transport_type == "--ALL--":
+            transport_type = ''
+        sql = "select take.TransitDate,take.Route,take.TransportType,transit.Price from take join transit on take.Route = transit.Route where transit.TransportType like concat(\'%\',\'"+ transport_type + "\',\'%\') and take.Username like \'" + self.user_name + "\' \
+                and take.TransitDate >= \'" + start_date + "\' and take.TransitDate <= \'" + end_date + "\' and take.Route in (select Route from connect where connect.Name like \'" + contain_site + "\' and connect.Route like concat(\'%\',\'"+ route + "\',\'%\'));"
+        # print(sql)
+        # print(contain_site)
+        # print(transport_type)
+        # print(start_date)
+        # print(end_date)
+        # print(route)    
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        for row in result:
+            self.add_line(row)
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
 
-    def add_line(self):
-        #route,transport_type,price,connected_sites = ss.split()
-        date,route,transport_type,price= ['2019-02-01','816','Bus','2.5']
+    def add_line(self,row):
+        date,route,transport_type,price = row
+        date = str(date)
+        print(date)
+        price = str(price)
         row_count = self.tableWidget.rowCount()
-        self.tableWidget.setItem(row_count,0,QTableWidgetItem(date))
         self.tableWidget.setRowCount(row_count + 1)
+        self.tableWidget.setItem(row_count,0,QTableWidgetItem(date))
         self.tableWidget.setItem(row_count,1,QTableWidgetItem(route))
         self.tableWidget.setItem(row_count,2,QTableWidgetItem(transport_type))
         self.tableWidget.setItem(row_count,3,QTableWidgetItem(price))
+
+    def get_sites(self):
+        query1 = "SELECT DISTINCT Name FROM connect;" 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        for row in result:
+            self.site_list.append(row[0])
+        print(self.site_list)
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+
+def render():
+    user_transit_history = QtWidgets.QMainWindow()
+    ui = Ui_user_transit_history()
+    ui.setupUi(user_transit_history)
+    user_transit_history.show()
+    sys.exit(app.exec_())
+    user_transit_history.close()
 
 if __name__ == "__main__":
     import sys
