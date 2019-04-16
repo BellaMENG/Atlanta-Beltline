@@ -9,6 +9,12 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget,QHBoxLayout,QTableWidget,QPushButton,QApplication,QVBoxLayout,QTableWidgetItem,QCheckBox,QAbstractItemView,QHeaderView,QLabel,QFrame
 from PyQt5.QtCore import Qt
+import __main__
+import sys
+import mysql.connector
+
+app = QtWidgets.QApplication(sys.argv)
+
 class Ui_user_take_transit(object):
     def setupUi(self, user_take_transit):
         user_take_transit.setObjectName("user_take_transit")
@@ -102,8 +108,8 @@ class Ui_user_take_transit(object):
         QtCore.QMetaObject.connectSlotsByName(user_take_transit)
 
         self.tableWidget.setColumnCount(5)
-        self.tableWidget.setHorizontalHeaderLabels(['Selected','Route','Transport Type','Price','# Connected Sites'])
-        self.tableWidget.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
+        self.tableWidget.setHorizontalHeaderLabels(['Selected','        Route        ','        Transport Type        ','        Price        ','        # Connected Sites        '])
+        self.tableWidget.horizontalHeader().setSectionResizeMode(0,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(2,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeToContents)
@@ -126,23 +132,75 @@ class Ui_user_take_transit(object):
         type_list = ['--ALL--','MARTA','Bus','Bike']
         self.transport_type_combobox.addItems(type_list)
 
-        self.filter_btn.clicked.connect(self.add_line)
+        self.site_list = list()
+        self.get_sites()
+        self.site_combobox.addItems(self.site_list)
+
+        self.filter_btn.clicked.connect(self.filter)
         self.log_transit_btn.clicked.connect(self.log_transit)
         self.check_box_list = list()
+        self.user_name = __main__.logged_user
+
+
+    def get_sites(self):
+        query1 = "SELECT DISTINCT Name FROM connect;" 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        for row in result:
+            self.site_list.append(row[0])
+        print(self.site_list)
 
     def filter(self):
+        self.tableWidget.setRowCount(0)
         contain_site = self.site_combobox.currentText()
         transport_type = self.transport_type_combobox.currentText()
         min_price = self.min_price_lineEdit.text()
+        if not min_price:
+            min_price = 0
+        else:
+            min_price = float(min_price)
         max_price = self.max_price_lineEdit.text()
+        if not max_price:
+            max_price = 1000
+        else:
+            max_price = float(max_price)
+        if transport_type == "--ALL--":
+            transport_type = ''
         print(contain_site)
         print(transport_type)
         print(min_price)
         print(max_price)
+        mydb = mysql.connector.connect(
+                 host="localhost",       # 数据库主机地址
+                user="root",    # 数据库用户名
+                passwd='',
+                database = 'Beltline'
+                )
+        cursor = mydb.cursor()
+        sql = "call get_transit_options(\'"+ contain_site+ "\',\'"+ transport_type+"\',"+str(min_price)+","+str(max_price)+");"
+        print(sql)
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        for row in result:
+            print(row)
+            self.add_line(row)
+        if(mydb.is_connected()):
+            cursor.close()
+            mydb.close()
+            print("MySQL connection is closed")
 
-    def add_line(self):
-        #route,transport_type,price,connected_sites = ss.split()
-        route,transport_type,price,connected_sites = ['816','Bus','2.5','3']
+    def add_line(self,row):
+        route,transport_type,price,connected_sites = row
+        #route,transport_type,price,connected_sites = ['816','Bus','2.5','3']
+        connected_sites = str(connected_sites)
+        price = str(price)
         row_count = self.tableWidget.rowCount()
         self.tableWidget.setRowCount(row_count + 1)
         ck = QCheckBox()
@@ -161,22 +219,80 @@ class Ui_user_take_transit(object):
     def log_transit(self):
         idx = -1
         info = list()
+        info.append(self.user_name)
+        date = self.dateEdit.date()
+        if self.hasTakenTransit(date):
+            QMessageBox.warning(self.label, 
+                                    "Log Error", 
+                                    "Can not register multiple transit in one day", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
+
         for i in range(len(self.check_box_list)):
             if self.check_box_list[i].isChecked():
                 if idx == -1:
                     idx = i
                 else:
-                    print("Can not register multiple transit in one day")
+                    QMessageBox.warning(self.label, 
+                                    "Invalid Input", 
+                                    "Can not register multiple transit in one day", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
                     return
-        info.append(self.tableWidget.item(idx ,1).text())
         info.append(self.tableWidget.item(idx ,2).text())
-        info.append(self.tableWidget.item(idx ,3).text())
-        info.append(self.tableWidget.item(idx ,4).text())
-                    
+        info.append(self.tableWidget.item(idx ,1).text())
+        formatted_date = date.toString(Qt.ISODate)
+        info.append(formatted_date)
         if idx == -1:
-            print("Please select a route")
+            QMessageBox.warning(self.label, 
+                                    "Invalid Input", 
+                                    "No Route Selected!", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
         else:
-            print(info)
+            connection_object = __main__.connection_pool.get_connection()
+            if connection_object.is_connected():
+                db_Info = connection_object.get_server_info()
+                print("user_login.py login() Connected to MySQL server: ",db_Info)
+            else:
+                print("user_login.py login() Not Connected ")
+            cursor = connection_object.cursor()
+            cursor.callproc('log_user_transit',info)
+            connection_object.commit()
+            if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+    
+    def hasTakenTransit(self,date):
+        formatted_date = date.toString(Qt.ISODate)
+        query1 = "SELECT count(*) FROM take WHERE Username = \'" + self.user_name + "\' and TransitDate = \'" + formatted_date + "\';" 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if result[0][0] == 0:
+            return False
+        else:
+            return True
+
+def render():
+    user_take_transit = QtWidgets.QMainWindow()
+    ui = Ui_user_take_transit()
+    ui.setupUi(user_take_transit)
+    user_take_transit.show()
+    sys.exit(app.exec_())
 
 if __name__ == "__main__":
     import sys

@@ -72,15 +72,16 @@ class Ui_staff_functionality(object):
         self.view_transit_history_btn.setText(_translate("staff_functionality", "View Transit History"))
         self.back_btn.setText(_translate("staff_functionality", "Back"))
 
-        self.manage_profile_btn.clicked.connect(lambda:self.func(9))
-        self.view_schedule_btn.clicked.connect(lambda:self.func(9))
-        self.take_transit_btn.clicked.connect(lambda:self.func(9))
-        self.view_transit_history_btn.clicked.connect(lambda:self.func(9))
-        self.back_btn.clicked.connect(lambda:self.func(9))
+        self.manage_profile_btn.clicked.connect(lambda:self.func(17))
+        self.view_schedule_btn.clicked.connect(lambda:self.func(31))
+        self.take_transit_btn.clicked.connect(lambda:self.func(15))
+        self.view_transit_history_btn.clicked.connect(lambda:self.func(16))
+        self.back_btn.clicked.connect(lambda:self.func(1))
 
     def func(self,idx):
-        __main__.screen = idx
+        __main__.screen_number = idx
         app.exit()
+
     
 def render():
     staff_functionality = QtWidgets.QMainWindow()

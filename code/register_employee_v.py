@@ -432,15 +432,17 @@ class Ui_register_employee_v(object):
         #connection_object.commit()
         print(query5)
 
-        
+        query6 = "insert into visitor values (\'"+user_name+"\')"
+        cursor.execute(query6)
+        print(query6)
+
         for email in emails:
             query4 = "insert into emails values ( \'" + user_name + "\',\'" + email + "\');"
             cursor.execute(query4)
-            
             print(query4)
+
         connection_object.commit()
         if(connection_object.is_connected()):
-
             cursor.close()
             connection_object.close()
             print("MySQL connection is closed")

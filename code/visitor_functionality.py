@@ -79,12 +79,12 @@ class Ui_visitor_functionality(object):
         self.view_transit_history_btn.setText(_translate("visitor_functionality", "View Transit History"))
         self.back_btn.setText(_translate("visitor_functionality", "Back"))
 
-        self.explore_event_btn.clicked.connect(lambda:self.func(17))
-        self.explore_site_btn.clicked.connect(lambda:self.func(17))
-        self.view_visit_history_btn.clicked.connect(lambda:self.func(17))
-        self.take_transit_btn.clicked.connect(lambda:self.func(17))
-        self.view_transit_history_btn.clicked.connect(lambda:self.func(17))
-        self.back_btn.clicked.connect(lambda:self.func(17))
+        self.explore_event_btn.clicked.connect(lambda:self.func(33))
+        self.explore_site_btn.clicked.connect(lambda:self.func(35))
+        self.view_visit_history_btn.clicked.connect(lambda:self.func(38))
+        self.take_transit_btn.clicked.connect(lambda:self.func(15))
+        self.view_transit_history_btn.clicked.connect(lambda:self.func(16))
+        self.back_btn.clicked.connect(lambda:self.func(1))
 
 def render():
     visitor_functionality = QtWidgets.QMainWindow()

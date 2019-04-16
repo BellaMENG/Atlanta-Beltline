@@ -25,16 +25,25 @@ user_name = 'clu319'
 pwd = '12345678'
 lname = 'lu'
 fname = 'cb'
-cursor = connection_object.cursor()
-#query3 = "insert into user values (\'"+ user_name + "\',\'" + pwd + "\'," + "\'Pending\'" + ",\'" + fname + "\',\'" + lname + "\',\'User\');"
-sql = "select * from user;"
-cursor.execute(sql)
+
+mydb = mysql.connector.connect(
+  host="localhost",       # 数据库主机地址
+  user="root",    # 数据库用户名
+  passwd='',
+  database = 'Beltline'
+)
+cursor = mydb.cursor()
+sql = "call get_transit_options(\'\',\'\',0,100);"
+print(sql)
+cursor.execute(sql,multi=True)
 result = cursor.fetchall()
 for row in result:
     print(row)
-
+# for result in cursor.stored_results():
+#     print(result.fetchall())
 
 if(connection_object.is_connected()):
     cursor.close()
     connection_object.close()
     print("MySQL connection is closed")
+

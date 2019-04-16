@@ -93,15 +93,15 @@ class Ui_manager_functionality(object):
         self.back_btn.setText(_translate("manager_functionality", "Back"))
         
         self.manage_profile_btn.clicked.connect(lambda:self.func(17))
-        self.manage_event_btn.clicked.connect(lambda:self.func(17))
-        self.view_staff_btn.clicked.connect(lambda:self.func(17))
-        self.view_site_report_btn.clicked.connect(lambda:self.func(17))
-        self.take_transit_btn.clicked.connect(lambda:self.func(17))
-        self.view_transit_history_btn.clicked.connect(lambda:self.func(17))
-        self.back_btn.clicked.connect(lambda:self.func(17))
+        self.manage_event_btn.clicked.connect(lambda:self.func(25))
+        self.view_staff_btn.clicked.connect(lambda:self.func(28))
+        self.view_site_report_btn.clicked.connect(lambda:self.func(29))
+        self.take_transit_btn.clicked.connect(lambda:self.func(15))
+        self.view_transit_history_btn.clicked.connect(lambda:self.func(16))
+        self.back_btn.clicked.connect(lambda:self.func(11))
 
     def func(self,idx):
-        __main__.screen = idx
+        __main__.screen_number = idx
         app.exit()
 
 def render():

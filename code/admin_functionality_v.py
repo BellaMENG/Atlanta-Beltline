@@ -126,7 +126,7 @@ class Ui_admin_functionality_v(object):
         
 
     def func(self,idx):
-        __main__.screen = idx
+        __main__.screen_number = idx
         app.exit()
 
 def render():

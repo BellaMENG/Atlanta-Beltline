@@ -126,14 +126,24 @@ class Ui_UserLogin(object):
         ############################
 
         function_screens = { "User": 7,
-                            "admin": 8,
-                            "admin_visitor":9,
-                            "manager":10,
-                            "manager_visitor":11,
-                            "staff":12,
-                            "staff_visitor":13,
-                            "visitor":14}
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            "Manager":10,
+                            "Manager_Visitor":11,
+                            "Staff":12,
+                            "Staff_Visitor":13,
+                            "Visitor":14}
         if exist:
+            if user_type == "Administrator" :
+                if self.isVisitor(user_name):
+                    user_type = "Administrator_Visitor"
+            if user_type == "Manager":
+                if self.isVisitor(user_name):
+                    user_type = "Manager_Visitor"
+            if user_type == "Staff":
+                if self.isVisitor(user_name):
+                    user_type = "Staff_Visitor"
+            
             __main__.logged_user = user_name
             __main__.user_type = user_type
             __main__.screen_number = function_screens[user_type]
@@ -144,6 +154,27 @@ class Ui_UserLogin(object):
                                     "Invalid email or password!", 
                                     QMessageBox.Yes, 
                                     QMessageBox.Yes)
+
+    def isVisitor(self,user_name):
+        query1 = "SELECT count(*) FROM visitor WHERE Username = \'" + user_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if result[0][0] == 0:
+            return False
+        else:
+            return True
+
 
     def register(self):
         __main__.screen_number = 2

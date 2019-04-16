@@ -100,7 +100,7 @@ class Ui_admin_functionality(object):
         self.back_btn.clicked.connect(lambda:self.func(9))
         
     def func(self,idx):
-        __main__.screen = idx
+        __main__.screen_number = idx
         app.exit()
 
 def render():

@@ -283,6 +283,34 @@ class Ui_register_employee(object):
         city = self.city_input.text()
         state = self.state_input.currentText()
         zipcode = self.zipcode_input.text()
+        #######################check user name####################
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("register_user.py Connected to MySQL server: ",db_Info)
+        else:
+            print("register_user.py  Not Connected ")
+        cursor = connection_object.cursor()
+
+        query1 = "select count(*) from user where Username = \'" + user_name + "\';"
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if result[0][0] != 0:
+            QMessageBox.warning(self.gridLayoutWidget , 
+                                    "Invalid Information", 
+                                    "This user name is registerd", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+            return
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+        ###################check empty or invalid#################################
         if ' ' in fname or len(fname) == 0:
             QMessageBox.warning(self.gridLayoutWidget , 
                                     "Invalid Information", 
@@ -339,39 +367,85 @@ class Ui_register_employee(object):
                                     QMessageBox.Yes)
                 return 
 
-        
+        #################check emails#######################################
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("register_user.py Connected to MySQL server: ",db_Info)
+        else:
+            print("register_user.py  Not Connected ")
+        cursor = connection_object.cursor()
+
         emails = list()
         for le in self.lineEdits:
             email = le.text()
             if not email:
                 continue
+            query2 = "select count(*) from emails where Email = \'" + email + "\';"
+            cursor.execute(query2)
+            result = cursor.fetchall()
+            if result[0][0] != 0:
+                QMessageBox.warning(self.gridLayoutWidget , 
+                                    "Invalid Information", 
+                                    "This email is registerd: %s"%(email), 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+                if(connection_object.is_connected()):
+                    cursor.close()
+                    connection_object.close()
+                    print("MySQL connection is closed")
+                return
             if not isValidEmail(email):
                 QMessageBox.warning(self.gridLayoutWidget , 
                                     "Invalid Information", 
                                     "Invalid Email address: %s"%(email), 
                                     QMessageBox.Yes, 
                                     QMessageBox.Yes)
+                if(connection_object.is_connected()):
+                    cursor.close()
+                    connection_object.close()
+                    print("MySQL connection is closed")
                 return
             else:
                 emails.append(email)
-
-        # store info to database
+        print(emails)
+        if(connection_object.is_connected()):
+                    cursor.close()
+                    connection_object.close()
+                    print("MySQL connection is closed")
+         ########################## store info to database##########################
         #TODO: SQL query to store the input infomation in the database
-        query1 = None
-        connection_object = connection_pool.get_connection()
+        query3 = "insert into user values (\'"+ user_name + "\',\'" + pwd + "\'," + "\'Pending\'" + ",\'" + fname + "\',\'" + lname + "\',\'"+ user_type+"\');"
+        connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ",info)
+            print("register_user.py Connected to MySQL server: ",db_Info)
         else:
-            print("user_login.py login() Not Connected ")
+            print("register_user.py  Not Connected ")
         cursor = connection_object.cursor()
-        cursor.execute(query1)
+        cursor.execute(query3)
+        #connection_object.commit()
+        print(query3)
+
+        query5 = "insert into employee values (\'"+user_name+"\',\'"+id+"\',\'"+phone+"\',\'"+address+"\',\'"+city+"\',\'"+state+"\',\'"+zipcode+"\');"
+        cursor.execute(query5)
+        #connection_object.commit()
+        print(query5)
+
+        
+        for email in emails:
+            query4 = "insert into emails values ( \'" + user_name + "\',\'" + email + "\');"
+            cursor.execute(query4)
+            
+            print(query4)
+        connection_object.commit()
         if(connection_object.is_connected()):
+
             cursor.close()
             connection_object.close()
             print("MySQL connection is closed")
         # switch to another screen
-        __main__.screen = 1
+        __main__.screen_number = 1
         app.exit()
 
 def render():
