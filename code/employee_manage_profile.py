@@ -9,7 +9,14 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from helper import isValidPhone, isValidEmail
 from PyQt5.QtWidgets import QMessageBox
+import __main__
+import sys
+
+app = QtWidgets.QApplication(sys.argv)
+
 class Ui_employee_manage_profile(object):
+    lineEdits = list()
+
     def setupUi(self, employee_manage_profile):
         employee_manage_profile.setObjectName("employee_manage_profile")
         employee_manage_profile.resize(800, 694)
@@ -97,7 +104,7 @@ class Ui_employee_manage_profile(object):
         self.employee_id_label.setFont(font)
         self.employee_id_label.setObjectName("employee_id_label")
         self.phone_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.phone_lineEdit.setGeometry(QtCore.QRect(580, 220, 150, 23))
+        self.phone_lineEdit.setGeometry(QtCore.QRect(580, 220, 113, 23))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.phone_lineEdit.setFont(font)
@@ -144,6 +151,19 @@ class Ui_employee_manage_profile(object):
         font.setPointSize(14)
         self.back_btn.setFont(font)
         self.back_btn.setObjectName("back_btn")
+        self.gridLayoutWidget = QtWidgets.QWidget(employee_manage_profile)
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(230, 360, 271, 51))
+        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
+        # self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        # self.lineEdit.setGeometry(QtCore.QRect(230, 360, 271, 25))
+        # self.lineEdit.setObjectName("lineEdit")
+        self.add_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.add_btn.setGeometry(QtCore.QRect(560, 340, 80, 23))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.add_btn.setFont(font)
+        self.add_btn.setObjectName("add_btn")
         employee_manage_profile.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(employee_manage_profile)
@@ -168,33 +188,164 @@ class Ui_employee_manage_profile(object):
         self.visitor_account_checkBox.setText(_translate("employee_manage_profile", "Visitor Account"))
         self.update_btn.setText(_translate("employee_manage_profile", "Update"))
         self.back_btn.setText(_translate("employee_manage_profile", "Back"))
+        self.add_btn.setText(_translate("employee_manage_profile", "Add"))
 
+        self.user_name = __main__.logged_user
         self.initInfo()
         self.update_btn.clicked.connect(self.update)
+        self.add_btn.clicked.connect(self.add_email_input)
+        self.back_btn.clicked.connect(lambda:self.func(idx=1))
+
+    def add_email_input(self):
+        if len(self.lineEdits) == 0:
+            h = 50
+        else:
+            h = len(self.lineEdits)*45 + 25
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(230, 360, 271, h))
+        lineEdit = QtWidgets.QLineEdit(self.gridLayoutWidget)
+        lineEdit.setObjectName("lineEdit")
+        self.gridLayout.addWidget(lineEdit, len(self.lineEdits), 0, 1, 1)
+        self.lineEdits.append(lineEdit)
+        _translate = QtCore.QCoreApplication.translate
+
+    def get_emails(self):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        sql = "select Email from emails where Username = \'" + self.user_name + "\';"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        for i in range(len(result)):
+            self.add_email_input()
+            self.lineEdits[i].setText(result[i][0])
+        sql = "delete from emails where Username = \'" + self.user_name + "\';"
+        cursor.execute(sql)
+        connection_object.commit()
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+
+    def email_exist(self,email):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        sql = "select Email from emails where Email = \'" + email+ "\';"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+        if len(result) == 0:
+            return False
+        else:
+            return True
+
+    def store_emails(self):
+        email_count = 0
+        email_list = list()
+        for lineEdit in self.lineEdits:
+            email = lineEdit.text()
+            if not email:
+                continue
+            else:
+                if isValidEmail(email) and not self.email_exist(email):
+                    email_list.append(email)
+                else:
+                    QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "Email Exists or Invalid!", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        for e in email_list:
+            sql = "insert into emails values (\'" + self.user_name + "\', \'" + e + "\');"
+            cursor.execute(sql)
+            connection_object.commit()
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
 
     def initInfo(self):
         #
         _translate = QtCore.QCoreApplication.translate
-        first_name,last_name,user_name,site_name,employee_id,phone,address = ['Clara','Wilson','cwison','Inman Park','123456789','123-123-1234','100 East Main Street']
+        query1 = "select e.Username, e.EmployeeID, e.Phone, e.Address, e.City, e.State, e.Zipcode, u.Firstname, u.Lastname from employee as e join user as u on e.Username = u.Username where e.Username = \'"+ self.user_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        print(query1)
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        user_name,employee_id,phone,address,city,state,zipcode,first_name,last_name = result[0]
+        query2 = "select SiteName from assign_to where Username = \'" + user_name + "\';"
+        cursor.execute(query2)
+        result = cursor.fetchall()
+        if len(result) == 0:
+            site_name = "None"
+        else:
+            site_name = result[0][0]
+        #first_name,last_name,user_name,site_name,employee_id,phone,address = ['Clara','Wilson','cwison','Inman Park','123456789','123-123-1234','100 East Main Street']
         self.user_name_label.setText(_translate("employee_manage_profile", user_name))
         self.site_name_label.setText(_translate("employee_manage_profile", site_name))
         self.employee_id_label.setText(_translate("employee_manage_profile", employee_id))
-        self.address_label.setText(_translate("employee_manage_profile", address))
+        self.address_label.setText(_translate("employee_manage_profile", address + ' , ' + city + ' , ' + state + " "+ zipcode))
         self.first_name_lineEdit.setText(first_name)
         self.last_name_lineEdit.setText(last_name)
         self.phone_lineEdit.setText(phone)
+        if self.isVisitor():
+            self.visitor_account_checkBox.setChecked(True)
+        else:
+            self.visitor_account_checkBox.setChecked(False)
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+        self.get_emails()
 
     def update(self):
         first_name = self.first_name_lineEdit.text()
         last_name = self.last_name_lineEdit.text()
         phone = self.phone_lineEdit.text()
         is_visitor_account = self.visitor_account_checkBox.isChecked()
+        query1 = "SELECT count(*) FROM visitor WHERE Username = \'" + self.user_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
         if not isValidPhone(phone):
             QMessageBox.warning(self.centralwidget, 
                                     "Invalid Information", 
                                     "Invalid Phone Number: %s"%(phone), 
                                     QMessageBox.Yes, 
                                     QMessageBox.Yes)
+            if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
             return 
 
         if not first_name or not last_name or not phone:
@@ -203,12 +354,63 @@ class Ui_employee_manage_profile(object):
                                     "All fileds required!", 
                                     QMessageBox.Yes, 
                                     QMessageBox.Yes)
+            if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
             return 
-        print(first_name)
-        print(last_name)
-        print(phone)
-        print(is_visitor_account)
+        if not is_visitor_account:
+            sql = "delete from visitor where Username = \'" + self.user_name + "\';"
+            cursor.execute(sql)
+            connection_object.commit()
+            
+        cursor = connection_object.cursor()
+        sql = "Update user set Lastname= \'" + last_name + "\', Firstname= \'" + first_name + "\' where Username= \'" + self.user_name + "';"
+        sql2 = "Update employee set Phone= \'" + phone +  "\' where Username= \'" + self.user_name + "\';"
+        print(sql)
+        cursor.execute(sql)
+        connection_object.commit()
+        cursor.execute(sql2)
+        connection_object.commit()
 
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+        
+        self.store_emails()
+    
+    def isVisitor(self):
+        query1 = "SELECT count(*) FROM visitor WHERE Username = \'" + self.user_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if result[0][0] == 0:
+            return False
+        else:
+            return True
+    
+    def func(idx):
+        __main__.screen_number = idx
+        self.store_emails()        
+
+def render():
+    employee_manage_profile = QtWidgets.QMainWindow()
+    ui = Ui_employee_manage_profile()
+    ui.setupUi(employee_manage_profile)
+    employee_manage_profile.show()
+    sys.exit(app.exec_())
+    employee_manage_profile.close()
 
 if __name__ == "__main__":
     import sys

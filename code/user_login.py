@@ -111,14 +111,17 @@ class Ui_UserLogin(object):
             print("MySQL connection is closed")
             return
         user_name = result[0][0]
-        query1 = "SELECT Password,UserType FROM user WHERE Username = \'" + user_name + "\';"
+        query1 = "SELECT Password,UserType,Status FROM user WHERE Username = \'" + user_name + "\';"
         cursor.execute(query1)
         result = cursor.fetchall()
         password = result[0][0]
         user_type = result[0][1]
+        status = result[0][2]
         exist = False
         if password == pwd:
             exist = True
+        if status == "Declined":
+            exist = False
         if(connection_object.is_connected()):
             cursor.close()
             connection_object.close()
@@ -151,7 +154,7 @@ class Ui_UserLogin(object):
         else:
             QMessageBox.warning(self.label, 
                                     "Invalid Information", 
-                                    "Invalid email or password!", 
+                                    "Invalid email or password or Declined Status! ", 
                                     QMessageBox.Yes, 
                                     QMessageBox.Yes)
 

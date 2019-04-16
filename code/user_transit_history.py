@@ -155,6 +155,7 @@ class Ui_user_transit_history(object):
 
         self.user_name = __main__.logged_user
         self.filter_btn.clicked.connect(self.filter)
+        self.back_btn.clicked.connect(lambda:self.func(idx=1))
 
 
     def filter(self):
@@ -186,9 +187,11 @@ class Ui_user_transit_history(object):
         for row in result:
             self.add_line(row)
         if(connection_object.is_connected()):
-                cursor.close()
-                connection_object.close()
-                print("MySQL connection is closed")
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+    
+    
 
     def add_line(self,row):
         date,route,transport_type,price = row
@@ -220,6 +223,10 @@ class Ui_user_transit_history(object):
                 cursor.close()
                 connection_object.close()
                 print("MySQL connection is closed")
+
+    def func(self,idx):
+        __main__.screen_number = idx
+        app.exit()
 
 def render():
     user_transit_history = QtWidgets.QMainWindow()
