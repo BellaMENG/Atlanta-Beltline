@@ -9,7 +9,7 @@ import __main__
 #from __main__ import connection_pool
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-from helper import isValidEmail
+from helper import isValidEmail,isValidZipcode,isValidPhone
 import sys
 
 app = QtWidgets.QApplication(sys.argv)

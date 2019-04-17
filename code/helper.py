@@ -34,7 +34,7 @@ def isValidPhone(phone):
 
 def isValidZipcode(zipcode):
     nums = ['0','1','2','3','4','5','6','7','8','9']
-    if len(zipcode) == 9:
+    if len(zipcode) == 5:
         for s in zipcode:
             if s not in nums:
                 return False
