@@ -10,7 +10,7 @@ logged_user = None
 import user_login,register_navigation,register_user,register_visitor,register_employee,register_employee_v
 import user_functionality,admin_functionality,admin_functionality_v,manager_functionality,manager_functionality_v,staff_functionality,staff_functionality_v,visitor_functionality
 import user_take_transit,user_transit_history,employee_manage_profile
-import administrator_manage_user,administrator_manage_site,administrator_edit_site,administrator_create_site
+import administrator_manage_user,administrator_manage_site,administrator_edit_site,administrator_create_site, administrator_manage_transit
 if __name__ == "__main__":
     connection_pool = pooling.MySQLConnectionPool( pool_name = "beltline_pool",
                                                                    pool_size = 5,
@@ -29,8 +29,8 @@ if __name__ == "__main__":
 
     #user_login.render()
     # logged_user = 'manager2'
-    administrator_manage_site.render()
-    print("screen number after admin manage site:",screen_number)
+    administrator_manage_transit.render()
+    print("screen number after test page:",screen_number)
     while True:
         if screen_number == 1:
             user_login.render()

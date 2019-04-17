@@ -156,6 +156,10 @@ class Ui_user_take_transit(object):
         for row in result:
             self.site_list.append(row[0])
         print(self.site_list)
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
 
     def filter(self):
         self.tableWidget.setRowCount(0)
@@ -240,10 +244,6 @@ class Ui_user_take_transit(object):
                                     QMessageBox.Yes, 
                                     QMessageBox.Yes)
                     return
-        info.append(self.tableWidget.item(idx ,2).text())
-        info.append(self.tableWidget.item(idx ,1).text())
-        formatted_date = date.toString(Qt.ISODate)
-        info.append(formatted_date)
         if idx == -1:
             QMessageBox.warning(self.label, 
                                     "Invalid Input", 
@@ -252,6 +252,10 @@ class Ui_user_take_transit(object):
                                     QMessageBox.Yes)
             return
         else:
+            info.append(self.tableWidget.item(idx ,2).text())
+            info.append(self.tableWidget.item(idx ,1).text())
+            formatted_date = date.toString(Qt.ISODate)
+            info.append(formatted_date)
             connection_object = __main__.connection_pool.get_connection()
             if connection_object.is_connected():
                 db_Info = connection_object.get_server_info()
