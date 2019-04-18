@@ -141,6 +141,7 @@ class Ui_user_take_transit(object):
         self.log_transit_btn.clicked.connect(self.log_transit)
         self.check_box_list = list()
         self.user_name = __main__.logged_user
+        self.back_btn.clicked.connect(self.back)
 
 
     def get_sites(self):
@@ -295,6 +296,18 @@ class Ui_user_take_transit(object):
             return False
         else:
             return True
+    
+    def back(self):
+        function_screens = { "User": 7,
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            "Manager":10,
+                            "Manager_Visitor":11,
+                            "Staff":12,
+                            "Staff_Visitor":13,
+                            "Visitor":14}
+        __main__.screen_number = function_screens[__main__.user_type]
+        app.exit()
 
 def render():
     user_take_transit = QtWidgets.QMainWindow()

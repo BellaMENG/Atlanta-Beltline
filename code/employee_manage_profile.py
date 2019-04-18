@@ -15,8 +15,6 @@ import sys
 app = QtWidgets.QApplication(sys.argv)
 
 class Ui_employee_manage_profile(object):
-    lineEdits = list()
-
     def setupUi(self, employee_manage_profile):
         employee_manage_profile.setObjectName("employee_manage_profile")
         employee_manage_profile.resize(800, 694)
@@ -189,12 +187,13 @@ class Ui_employee_manage_profile(object):
         self.update_btn.setText(_translate("employee_manage_profile", "Update"))
         self.back_btn.setText(_translate("employee_manage_profile", "Back"))
         self.add_btn.setText(_translate("employee_manage_profile", "Add"))
-
+        self.lineEdits = list()
         self.user_name = __main__.logged_user
         self.initInfo()
         self.update_btn.clicked.connect(self.update)
         self.add_btn.clicked.connect(self.add_email_input)
-        self.back_btn.clicked.connect(lambda:self.func(idx=1))
+        self.back_btn.clicked.connect(self.back_func)
+        self.stored = False
 
     def add_email_input(self):
         if len(self.lineEdits) == 0:
@@ -282,6 +281,7 @@ class Ui_employee_manage_profile(object):
                 cursor.close()
                 connection_object.close()
                 print("MySQL connection is closed")
+        self.stored = True
 
     def initInfo(self):
         #
@@ -318,9 +318,9 @@ class Ui_employee_manage_profile(object):
         else:
             self.visitor_account_checkBox.setChecked(False)
         if(connection_object.is_connected()):
-                cursor.close()
-                connection_object.close()
-                print("MySQL connection is closed")
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
         self.get_emails()
 
     def update(self):
@@ -360,6 +360,14 @@ class Ui_employee_manage_profile(object):
                 print("MySQL connection is closed")
             return 
         if not is_visitor_account:
+
+            if __main__.user_type == "Administrator_Visitor":
+                __main__.user_type = "Administrator"
+            elif __main__.user_type == "Manager_Visitor":
+                __main__.user_type = "Manager"
+            elif __main__.user_type == "Staff_Visitor":
+                __main__.user_type = "Staff"
+
             sql = "delete from visitor where Username = \'" + self.user_name + "\';"
             cursor.execute(sql)
             connection_object.commit()
@@ -374,9 +382,9 @@ class Ui_employee_manage_profile(object):
         connection_object.commit()
 
         if(connection_object.is_connected()):
-                cursor.close()
-                connection_object.close()
-                print("MySQL connection is closed")
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
         
         self.store_emails()
     
@@ -400,16 +408,34 @@ class Ui_employee_manage_profile(object):
         else:
             return True
     
-    def func(idx):
+    def func(self,idx):
         __main__.screen_number = idx
-        self.store_emails()        
+        app.exit()
+    
+    def back_func(self):
+        if not self.stored:
+            self.store_emails()
+        if __main__.user_type == "Manager":
+            self.func(10)
+        elif __main__.user_type == "Manager_Visitor":
+            self.func(11)
+        elif __main__.user_type == "Staff":
+            self.func(12)
+        elif __main__.user_type == "Staff_Visitor":
+            self.func(13)
+        elif __main__.user_type == "Administrator_Visitor":
+            self.func(9)
+        elif __main__.user_type == "Administrator":
+            self.func(8)
+        
+
 
 def render():
     employee_manage_profile = QtWidgets.QMainWindow()
     ui = Ui_employee_manage_profile()
     ui.setupUi(employee_manage_profile)
     employee_manage_profile.show()
-    sys.exit(app.exec_())
+    app.exec_()
     employee_manage_profile.close()
 
 if __name__ == "__main__":

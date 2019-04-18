@@ -11,7 +11,7 @@ if __name__ == "__main__":
                                                                    pool_size = 5,
                                                                    pool_reset_session = True,
                                                                    host = 'localhost',
-                                                                   database = 'Beltline',
+                                                                   database = 'beltline_version2',
                                                                    user = 'root',
                                                                    password = '',
                                                                    use_pure = True)
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         print("Connected to MySQL server: ",info)
     else:
         print("Database not connected")
-user_name = 'manager2'
+user_name = 'sunxiaochuan'
 pwd = '12345678'
 lname = 'lu'
 fname = 'cb'
@@ -29,23 +29,41 @@ first_name = 'haha'
 last_name = 'xixi'
 phone = '123-456-7890'
 
-# mydb = mysql.connector.connect(
-#   host="localhost",       # 数据库主机地址
-#   user="root",    # 数据库用户名
-#   passwd='',
-#   database = 'Beltline'
-# )
-cursor = connection_object.cursor()
-sql = "Update user set Lastname= \'" + last_name + "\', Firstname= \'" + first_name + "\' where Username= \'" + user_name + "';"
-sql2 = "Update employee set Phone= \'" + phone +  "\' where Username= \'" + user_name + "\';"
-print(sql)
-cursor.execute(sql)
-connection_object.commit()
-cursor.execute(sql2)
-connection_object.commit()
+def isManager(suser_name):
+    query1 = "SELECT count(*) FROM manager WHERE Username = \'" + user_name + "\';"
+    connection_object = connection_pool.get_connection()
+    if connection_object.is_connected():
+        db_Info = connection_object.get_server_info()
+        print("user_login.py login() Connected to MySQL server: ",db_Info)
+    else:
+        print("user_login.py login() Not Connected ")
+    cursor = connection_object.cursor()
+    cursor.execute(query1)
+    result = cursor.fetchall()
+    if(connection_object.is_connected()):
+        cursor.close()
+        connection_object.close()
+        print("MySQL connection is closed")
+    if result[0][0] == 0:
+        return False
+    else:
+        return True
 
-if(connection_object.is_connected()):
-    cursor.close()
-    connection_object.close()
-    print("MySQL connection is closed")
+# query1 = "SELECT count(*) FROM visitor WHERE Username = \'" + user_name + "\';"
+# connection_object = connection_pool.get_connection()
+# if connection_object.is_connected():
+#     db_Info = connection_object.get_server_info()
+#     print("user_login.py login() Connected to MySQL server: ",db_Info)
+# else:
+#     print("user_login.py login() Not Connected ")
+# cursor = connection_object.cursor()
+# cursor.execute(query1)
+# result = cursor.fetchall()
+# if(connection_object.is_connected()):
+#     cursor.close()
+#     connection_object.close()
+#     print("MySQL connection is closed")
+# print(type(result[0][0]))
+# print(result[0][0])
 
+print(isManager(user_name))
