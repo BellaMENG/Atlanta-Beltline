@@ -122,7 +122,7 @@ class Ui_admin_functionality_v(object):
         self.take_transit_btn.clicked.connect(lambda:self.func(15))
         self.explore_site_btn.clicked.connect(lambda:self.func(35))
         self.view_visit_history_btn.clicked.connect(lambda:self.func(38))
-        self.back_btn.clicked.connect(lambda:self.func(9))
+        self.back_btn.clicked.connect(lambda:self.func(1))
         
 
     def func(self,idx):

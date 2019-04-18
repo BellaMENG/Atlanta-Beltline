@@ -28,6 +28,9 @@ class Ui_UserLogin(object):
         self.pushButton_2 = QtWidgets.QPushButton(UserLogin)
         self.pushButton_2.setGeometry(QtCore.QRect(310, 250, 91, 31))
         self.pushButton_2.setObjectName("pushButton_2")
+        self.pushButton_3 = QtWidgets.QPushButton(UserLogin)
+        self.pushButton_3.setGeometry(QtCore.QRect(170, 250, 91, 31))
+        self.pushButton_3.setObjectName("pushButton_3")
         self.lineEdit = QtWidgets.QLineEdit(UserLogin)
         self.lineEdit.setGeometry(QtCore.QRect(140, 130, 251, 23))
         self.lineEdit.setObjectName("lineEdit")
@@ -70,12 +73,14 @@ class Ui_UserLogin(object):
         UserLogin.setWindowTitle(_translate("UserLogin", "User Login"))
         self.pushButton.setText(_translate("UserLogin", "Login"))
         self.pushButton_2.setText(_translate("UserLogin", "Register"))
+        self.pushButton_3.setText(_translate("UserLogin", "Quit"))
         self.label.setText(_translate("UserLogin", "Email"))
         self.label_2.setText(_translate("UserLogin", "Password"))
         self.label_3.setText(_translate("UserLogin", "Atlanta Beltline Login"))
 
         self.pushButton.clicked.connect(self.login)
         self.pushButton_2.clicked.connect(self.register)
+        self.pushButton_3.clicked.connect(self.quit)
 
     def login(self):
         pwd = self.lineEdit_2.text()
@@ -250,6 +255,10 @@ class Ui_UserLogin(object):
 
     def register(self):
         __main__.screen_number = 2
+        app.exit()
+
+    def quit(self):
+        __main__.Quit = True
         app.exit()
     
 def render():
