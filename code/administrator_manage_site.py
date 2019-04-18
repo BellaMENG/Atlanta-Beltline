@@ -9,6 +9,12 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget,QHBoxLayout,QTableWidget,QPushButton,QApplication,QVBoxLayout,QTableWidgetItem,QCheckBox,QAbstractItemView,QHeaderView,QLabel,QFrame
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox
+import __main__
+import sys
+import administrator_edit_site
+
+app = QtWidgets.QApplication(sys.argv)
 
 class Ui_adniministrator_manage_site(object):
     def setupUi(self, adniministrator_manage_site):
@@ -100,10 +106,28 @@ class Ui_adniministrator_manage_site(object):
         self.back_btn.setFont(font)
         self.back_btn.setObjectName("back_btn")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
-        self.tableWidget.setGeometry(QtCore.QRect(160, 260, 451, 251))
+        self.tableWidget.setGeometry(QtCore.QRect(110, 260, 451, 251))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
+        self.formLayoutWidget = QtWidgets.QWidget(self.centralwidget)
+        self.formLayoutWidget.setGeometry(QtCore.QRect(590, 270, 160, 80))
+        self.formLayoutWidget.setObjectName("formLayoutWidget")
+        self.formLayout = QtWidgets.QFormLayout(self.formLayoutWidget)
+        self.formLayout.setContentsMargins(0, 0, 0, 0)
+        self.formLayout.setObjectName("formLayout")
+        self.sortbyLabel = QtWidgets.QLabel(self.formLayoutWidget)
+        self.sortbyLabel.setObjectName("sortbyLabel")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.sortbyLabel)
+        self.sortbyComboBox = QtWidgets.QComboBox(self.formLayoutWidget)
+        self.sortbyComboBox.setObjectName("sortbyComboBox")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.sortbyComboBox)
+        self.orderLabel = QtWidgets.QLabel(self.formLayoutWidget)
+        self.orderLabel.setObjectName("orderLabel")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.orderLabel)
+        self.orderComboBox = QtWidgets.QComboBox(self.formLayoutWidget)
+        self.orderComboBox.setObjectName("orderComboBox")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.orderComboBox)
         adniministrator_manage_site.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(adniministrator_manage_site)
@@ -123,20 +147,116 @@ class Ui_adniministrator_manage_site(object):
         self.back_btn.setText(_translate("adniministrator_manage_site", "Back"))
 
         self.open_everyday_comboBox.addItems(['Yes','No'])
+        order_list = ['ASC','DESC']
+        self.orderComboBox.addItems(order_list)
+
+        col_list = ["site.Name","manager.Name","site.OpenEveryDay"]
+        self.sortbyComboBox.addItems(col_list)
 
         self.tableWidget.setColumnCount(4)
-        self.tableWidget.setHorizontalHeaderLabels(['    Selected     ','     Name      ','      Manager     ','     Open Everyday     '])
+        self.tableWidget.setHorizontalHeaderLabels(['   Selected   ','   Name    ','    Manager   ','     Open Everyday     '])
         self.tableWidget.horizontalHeader().setSectionResizeMode(0,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(2,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeToContents)
         self.check_box_list = list()
-
+        self.manager_list = ['']
+        self.site_list = ['']
+        self.get_managers()
+        self.get_sites()
+        self.manager_comboBox.addItems(self.manager_list)
+        self.site_comboBox.addItems(self.site_list)
+        self.filter_btn.clicked.connect(self.filter)
+        self.delete_btn.clicked.connect(self.delete_site)
+        self.edit_btn.clicked.connect(self.edit_site)
+        self.back_btn.clicked.connect(lambda:self.func(idx=1))
         #self.create_btn.clicked.connect(self.add_line)
 
-    def add_line(self):
-        #route,transport_type,price,connected_sites = ss.split()
-        name,manager,open_everyday = ['lcb','jimmy','Yes']
+    def filter(self):
+        self.tableWidget.setRowCount(0)
+        self.check_box_list = list()
+        site = self.site_comboBox.currentText()
+        manager = self.manager_comboBox.currentText()
+        open_everyday = self.open_everyday_comboBox.currentText()
+        order = self.orderComboBox.currentText()
+        order_col = self.sortbyComboBox.currentText()
+        if order_col == "manager.Name":
+            order_col = "concat(user.Firstname,\' \',user.Lastname)"
+        sql = "select site.Name , concat(user.Firstname,\' \',user.Lastname), site.OpenEveryDay from user join site on user.Username = site.Manager where site.Name like concat(\'%\',\'" + site + "\' ,\'%\') and concat(user.Firstname,\' \',user.Lastname) like concat(\'%\',\'" + manager+ "\' ,\'%\') and site.OpenEveryDay like concat(\'%\',\'"+open_everyday+"\' ,\'%\') order by \'" + order_col + "\' \'" + order + "\';"
+        print(sql)
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        for row in result:
+            self.add_line(row)
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+    
+    def delete_site(self):
+        idx = -1
+        for i in range(len(self.check_box_list)):
+            if self.check_box_list[i].isChecked():
+                if idx != -1:
+                    QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "Only ONE site can be selected", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+                else:
+                    idx = i
+        if idx == -1:
+            return
+        site_name = self.tableWidget.item(idx,1).text()
+        manager = self.tableWidget.item(idx,2).text()
+        sql = "delete from site where Name = \'" + site_name + "\'"
+        print(sql)
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        connection_object.commit()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+
+    def edit_site(self):
+        idx = -1
+        for i in range(len(self.check_box_list)):
+            if self.check_box_list[i].isChecked():
+                if idx != -1:
+                    QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "Only ONE site can be selected", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+                else:
+                    idx = i
+        if idx == -1:
+            return
+        site_name = self.tableWidget.item(idx,1).text()
+        manager = self.tableWidget.item(idx,2).text()
+        print("edit site:" , site_name)
+        __main__.argv1 = site_name
+        __main__.argv2 = manager
+        __main__.screen_number = 20
+        app.exit()
+        
+
+    def add_line(self,row):
+        name,manager,open_everyday = row
         row_count = self.tableWidget.rowCount()
         self.tableWidget.setRowCount(row_count + 1)
         ck = QCheckBox()
@@ -150,6 +270,56 @@ class Ui_adniministrator_manage_site(object):
         self.tableWidget.setItem(row_count,2,QTableWidgetItem(manager))
         self.tableWidget.setItem(row_count,3,QTableWidgetItem(open_everyday))
         self.check_box_list.append(ck)
+    
+    def get_sites(self):
+        query1 = "SELECT DISTINCT Name FROM connect;" 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        for row in result:
+            self.site_list.append(row[0])
+        print(self.site_list)
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+    
+    def get_managers(self):
+        query1 = "select concat(Firstname, \' \',Lastname) from user where UserType = \'manager\'"; 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        for row in result:
+            self.manager_list.append(row[0])
+        print(self.manager_list)
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+
+    def func(self,idx):
+        __main__.screen_number = idx
+        app.exit()
+
+def render():
+    adniministrator_manage_site = QtWidgets.QMainWindow()
+    ui = Ui_adniministrator_manage_site()
+    ui.setupUi(adniministrator_manage_site)
+    adniministrator_manage_site.show()
+    app.exec_()
+    adniministrator_manage_site.close()
 
 if __name__ == "__main__":
     import sys

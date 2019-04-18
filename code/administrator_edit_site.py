@@ -7,8 +7,20 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QWidget,QHBoxLayout,QTableWidget,QPushButton,QApplication,QVBoxLayout,QTableWidgetItem,QCheckBox,QAbstractItemView,QHeaderView,QLabel,QFrame
+from PyQt5.QtCore import Qt
+from helper import isValidZipcode
+from PyQt5.QtWidgets import QMessageBox
+import sys
+import __main__
+
+app = QtWidgets.QApplication(sys.argv)
 
 class Ui_administrator_edit_site(object):
+    def __init__(self,site_name,manager):
+        self.site_name = site_name
+        self.manager = manager
+
     def setupUi(self, administrator_edit_site):
         administrator_edit_site.setObjectName("administrator_edit_site")
         administrator_edit_site.resize(588, 384)
@@ -113,7 +125,122 @@ class Ui_administrator_edit_site(object):
         self.openEverydayLabel.setText(_translate("administrator_edit_site", "Open Everyday"))
         self.back_btn.setText(_translate("administrator_edit_site", "Bcak"))
         self.update_btn.setText(_translate("administrator_edit_site", "Update"))
+        self.manager_list = [self.manager]
+        self.get_managers()
+        self.managerComboBox.addItems(self.manager_list)
+        self.init_info()
+        self.update_btn.clicked.connect(self.update)
+        self.back_btn.clicked.connect(self.back)
+        #self.managerComboBox.setDe
 
+    def get_managers(self):
+        query1 = "select concat(Firstname, \' \',Lastname) from user where UserType = \'manager\'"; 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        for row in result:
+            self.manager_list.append(row[0])
+        print(self.manager_list)
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+    
+    def init_info(self):
+        sql = "select Name , Zipcode,Address,OpenEveryDay from site where Name = \'" + self.site_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        name,zipcode,address,openeveryday = result[0]
+        self.nameLineEdit.setText(name)
+        self.zipcodeLineEdit.setText(zipcode)
+        self.addressLineEdit.setText(address)
+        if openeveryday == 'Yes':
+            self.openEverydayCheckBox.setChecked(True)
+        else:
+            self.openEverydayCheckBox.setChecked(False)
+    
+    def update(self):
+        name = self.nameLineEdit.text()
+        zipcode = self.zipcodeLineEdit.text()
+        address = self.addressLineEdit.text()
+        manager = self.managerComboBox.currentText()
+        query1 = "select Username from user where concat(Firstname, \' \',Lastname) like \'"+ manager + "\';" 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        manager = result[0][0]
+        if self.openEverydayCheckBox.isChecked():
+            openeveryday = "Yes"
+        else:
+            openeveryday = "No"
+            
+        if not isValidZipcode(zipcode):
+            QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "Invalid zipcode: %s"%(zipcode), 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
+        if not address or not name:
+            QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "All fileds required", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
+        sql = "update site set Name=\'" + name + "\', Zipcode= \'" + zipcode + "\', Address=\'" + address + "\', Manager=\'" + manager + "\', OpenEveryday=\'" + openeveryday +"\' where Name = \'"+ self.site_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        connection_object.commit()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+    
+    def back(self):
+        app.exit()
+
+def render(site_name,manager):
+    print("admin edit site render")
+    administrator_edit_site = QtWidgets.QMainWindow()
+    ui = Ui_administrator_edit_site(site_name,manager)
+    ui.setupUi(administrator_edit_site)
+    administrator_edit_site.show()
+    app.exec_()
+    administrator_edit_site.close()
 
 if __name__ == "__main__":
     import sys

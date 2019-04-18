@@ -9,7 +9,7 @@ import __main__
 #from __main__ import connection_pool
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-from helper import isValidEmail
+from helper import isValidEmail,hash_password
 import sys
 
 app = QtWidgets.QApplication(sys.argv)
@@ -313,7 +313,7 @@ class Ui_register_visitor(object):
                     connection_object.close()
                     print("MySQL connection is closed")
         ########################## store info to database##########################
-        #TODO: SQL query to store the input infomation in the database
+        pwd = hash_password(pwd)
         query3 = "insert into user values (\'"+ user_name + "\',\'" + pwd + "\'," + "\'Pending\'" + ",\'" + fname + "\',\'" + lname + "\',\'Visitor\');"
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():

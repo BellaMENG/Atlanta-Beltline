@@ -98,7 +98,7 @@ class Ui_manager_functionality(object):
         self.view_site_report_btn.clicked.connect(lambda:self.func(29))
         self.take_transit_btn.clicked.connect(lambda:self.func(15))
         self.view_transit_history_btn.clicked.connect(lambda:self.func(16))
-        self.back_btn.clicked.connect(lambda:self.func(11))
+        self.back_btn.clicked.connect(lambda:self.func(1))
 
     def func(self,idx):
         __main__.screen_number = idx

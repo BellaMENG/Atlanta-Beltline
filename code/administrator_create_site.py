@@ -7,6 +7,15 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QWidget,QHBoxLayout,QTableWidget,QPushButton,QApplication,QVBoxLayout,QTableWidgetItem,QCheckBox,QAbstractItemView,QHeaderView,QLabel,QFrame
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox
+import __main__
+import sys
+from helper import isValidZipcode
+
+
+app = QtWidgets.QApplication(sys.argv)
 
 class Ui_administrator_create_site(object):
     def setupUi(self, administrator_create_site):
@@ -114,6 +123,119 @@ class Ui_administrator_create_site(object):
         self.back_btn.setText(_translate("administrator_create_site", "Bcak"))
         self.update_btn.setText(_translate("administrator_create_site", "Update"))
 
+        self.manager_list = list()
+        self.get_managers()
+        self.managerComboBox.addItems(self.manager_list)
+        self.update_btn.clicked.connect(self.update)
+
+
+    def get_managers(self):
+        query1 = "select concat(Firstname, \' \',Lastname) from user where UserType = \'manager\'"; 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        for row in result:
+            self.manager_list.append(row[0])
+        print(self.manager_list)
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+    
+    def update(self):
+        name = self.nameLineEdit.text()
+        zipcode = self.zipcodeLineEdit.text()
+        address = self.addressLineEdit.text()
+        manager = self.managerComboBox.currentText()
+        query1 = "select Username from user where concat(Firstname, \' \',Lastname) like \'"+ manager + "\';" 
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        manager = result[0][0]
+        if self.openEverydayCheckBox.isChecked():
+            openeveryday = "Yes"
+        else:
+            openeveryday = "No"
+        if self.site_exist(name):
+            QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                   "Site name exists", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
+        if not isValidZipcode(zipcode):
+            QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "Invalid zipcode: %s"%(zipcode), 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
+        if not address or not name:
+            QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "All fileds required", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
+        sql = "insert into site values (\'" + name +"\', \'" + address + "\', \'" + zipcode + "\', \'" + openeveryday+ "\', \'" + manager +"\');"
+        print(sql)
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        connection_object.commit()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+
+    def site_exist(self,site_name):
+        sql = "select * from site where Name = \'" + site_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if len(result) == 0:
+            return False
+        else:
+            return True
+
+def render():
+    administrator_create_site = QtWidgets.QMainWindow()
+    ui = Ui_administrator_create_site()
+    ui.setupUi(administrator_create_site)
+    administrator_create_site.show()
+    app.exec_()
+    administrator_create_site.close()
 
 if __name__ == "__main__":
     import sys
