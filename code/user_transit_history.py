@@ -155,7 +155,7 @@ class Ui_user_transit_history(object):
 
         self.user_name = __main__.logged_user
         self.filter_btn.clicked.connect(self.filter)
-        self.back_btn.clicked.connect(lambda:self.func(idx=1))
+        self.back_btn.clicked.connect(self.back)
 
 
     def filter(self):
@@ -226,6 +226,18 @@ class Ui_user_transit_history(object):
 
     def func(self,idx):
         __main__.screen_number = idx
+        app.exit()
+
+    def back(self):
+        function_screens = { "User": 7,
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            "Manager":10,
+                            "Manager_Visitor":11,
+                            "Staff":12,
+                            "Staff_Visitor":13,
+                            "Visitor":14}
+        __main__.screen_number = function_screens[__main__.user_type]
         app.exit()
 
 def render():

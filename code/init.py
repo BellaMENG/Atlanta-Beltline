@@ -33,13 +33,22 @@ if __name__ == "__main__":
     # administrator_create_transit.render()
     # print("screen number after test page:",screen_number)
 
-    user_login.render()
-    print("screen number after user_login:",screen_number)
+    # user_login.render()
+    # print("screen number after user_login:",screen_number)
+    # print("user type after user_login:",user_type)
+    # print("user name after user_login",logged_user)
+
+    user_type = "Administrator"
+    logged_user = 'james.smith'
+    screen_number = 8
 
     while True:
+        print("loop running ",screen_number)
         if screen_number == 1:
             user_login.render()
             print("screen number after user_login:",screen_number)
+            print("user type after user_login:",user_type)
+            print("user name after user_login",logged_user)
 
         elif screen_number == 2:
             register_navigation.render()
@@ -132,5 +141,6 @@ if __name__ == "__main__":
         elif screen_number == 24:
             administrator_create_transit.render()
             print("screen number after screen_number:",screen_number)
+        
 
 

@@ -16,8 +16,6 @@ from PyQt5.QtWidgets import QMessageBox
 app = QtWidgets.QApplication(sys.argv)
 
 class Ui_register_user(object):
-    add_btns = list()
-    lineEdits = list()
     def setupUi(self, register_user):
         register_user.setObjectName("register_user")
         register_user.resize(685, 646)
@@ -170,6 +168,8 @@ class Ui_register_user(object):
         self.label_2.setText(_translate("register_user", "Register User"))
         self.back_btn.setText(_translate("register_user", "Back"))
         self.register_btn.setText(_translate("register_user", "Register"))
+        self.add_btns = list()
+        self.lineEdits = list()
         self.register_btn.clicked.connect(self.register)
         for btn in self.add_btns:
             btn.setText(_translate("register_visitor", "Add"))

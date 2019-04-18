@@ -66,7 +66,7 @@ def hash_password(password):
 
 def verify_password(stored_password, provided_password):
     """Verify a stored password against one provided by user"""
-    print(provided_password)
+    #print(provided_password)
     salt = stored_password[:64]
     stored_password = stored_password[64:]
     pwdhash = hashlib.pbkdf2_hmac('sha512', 
@@ -74,7 +74,7 @@ def verify_password(stored_password, provided_password):
                                   salt.encode('ascii'), 
                                   100000)
     pwdhash = binascii.hexlify(pwdhash).decode('ascii')
-    print(pwdhash)
+    #print(pwdhash)
     return pwdhash == stored_password
 
-print(len(hash_password("qwueydjclvkvjsiflmcps")))
+#print(len(hash_password("qwueydjclvkvjsiflmcps")))

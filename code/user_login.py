@@ -158,7 +158,7 @@ class Ui_UserLogin(object):
                     __main__.user_type = "Administrator"
             
             __main__.logged_user = user_name
-            __main__.screen_number = function_screens[user_type]
+            __main__.screen_number = function_screens[__main__.user_type]
             app.exit()
         else:
             QMessageBox.warning(self.label, 

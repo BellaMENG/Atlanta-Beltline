@@ -9,7 +9,7 @@ import __main__
 #from __main__ import connection_pool
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-from helper import isValidEmail,hash_password
+from helper import isValidEmail,hash_password,isValidPhone,isValidZipcode
 import sys,uuid
 
 app = QtWidgets.QApplication(sys.argv)
@@ -244,7 +244,7 @@ class Ui_register_employee_v(object):
         self.label_5.setText(_translate("register_employee", "Email"))
         self.pushButton.setText(_translate("register_employee", "Back"))
         self.pushButton_2.setText(_translate("register_employee", "Register"))
-        state_list = ['other','AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
+        state_list = ['OT','AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
         self.state_input.addItems(state_list)
         user_type_list = ['Manager','Staff']
         self.userTypeComboBox.addItems(user_type_list)
@@ -436,6 +436,12 @@ class Ui_register_employee_v(object):
         query6 = "insert into visitor values (\'"+user_name+"\')"
         cursor.execute(query6)
         print(query6)
+
+        if user_type == "Manager":
+            query7 = "insert into manager values(\'"+ user_name + "\',\'Manager\')"
+        elif user_type == "Staff":
+            query7 = "insert into staff values(\'"+ user_name + "\',\'Staff\')"
+        cursor.execute(query7)
 
         for email in emails:
             query4 = "insert into emails values ( \'" + user_name + "\',\'" + email + "\');"
