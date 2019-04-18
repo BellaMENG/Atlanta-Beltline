@@ -9,8 +9,8 @@ import __main__
 #from __main__ import connection_pool
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-from helper import isValidEmail,isValidZipcode,isValidPhone
-import sys
+from helper import isValidEmail,isValidZipcode,isValidPhone,hash_password
+import sys,uuid
 
 app = QtWidgets.QApplication(sys.argv)
 
@@ -252,29 +252,30 @@ class Ui_register_employee(object):
             btn.setText(_translate("register_employee", "Add"))
             btn.clicked.connect(self.add_email_input)
         self.pushButton_2.clicked.connect(self.register)
+        self.pushButton.clicked.connect(lambda:self.func(idx=2))
 
     def add_email_input(self):
         h = len(self.add_btns)*45 + 25
         self.gridLayoutWidget.setGeometry(QtCore.QRect(210, 450, 321, h))
-        add_btn = QtWidgets.QPushButton(self.gridLayoutWidget)
+        #add_btn = QtWidgets.QPushButton(self.gridLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
-        add_btn.setFont(font)
-        add_btn.setObjectName("add_btn")
-        self.gridLayout.addWidget(add_btn, len(self.add_btns), 1, 1, 1)
+        #add_btn.setFont(font)
+        #add_btn.setObjectName("add_btn")
+        #self.gridLayout.addWidget(add_btn, len(self.add_btns), 1, 1, 1)
         lineEdit = QtWidgets.QLineEdit(self.gridLayoutWidget)
         lineEdit.setObjectName("lineEdit")
         self.gridLayout.addWidget(lineEdit, len(self.lineEdits), 0, 1, 1)
-        self.add_btns.append(add_btn)
+        #self.add_btns.append(add_btn)
         self.lineEdits.append(lineEdit)
-        _translate = QtCore.QCoreApplication.translate
-        add_btn.setText(_translate("register_visitor", "Add"))
-        add_btn.clicked.connect(self.add_email_input)
+        #_translate = QtCore.QCoreApplication.translate
+        #add_btn.setText(_translate("register_visitor", "Add"))
+        #add_btn.clicked.connect(self.add_email_input)
 
     def register(self):
         fname = self.firstNameLineEdit.text()
         lname = self.lastNameLineEdit.text()
-        user_name = self.usernameLineEdit.text()
+        user_name = self.userNameLineEdit.text()
         pwd = self.passwordLineEdit.text()
         c_pwd = self.confirmedPasswordLineEdit.text()
         user_type = self.userTypeComboBox.currentText()
@@ -414,7 +415,7 @@ class Ui_register_employee(object):
                     connection_object.close()
                     print("MySQL connection is closed")
          ########################## store info to database##########################
-        #TODO: SQL query to store the input infomation in the database
+        pwd = hash_password(pwd)
         query3 = "insert into user values (\'"+ user_name + "\',\'" + pwd + "\'," + "\'Pending\'" + ",\'" + fname + "\',\'" + lname + "\',\'"+ user_type+"\');"
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
@@ -426,8 +427,8 @@ class Ui_register_employee(object):
         cursor.execute(query3)
         #connection_object.commit()
         print(query3)
-
-        query5 = "insert into employee values (\'"+user_name+"\',\'"+id+"\',\'"+phone+"\',\'"+address+"\',\'"+city+"\',\'"+state+"\',\'"+zipcode+"\');"
+        eid = str(uuid.uuid4().fields[-1])[:9]
+        query5 = "insert into employee values (\'"+user_name+"\',\'"+eid+"\',\'"+phone+"\',\'"+address+"\',\'"+city+"\',\'"+state+"\',\'"+zipcode+"\');"
         cursor.execute(query5)
         #connection_object.commit()
         print(query5)
@@ -440,12 +441,15 @@ class Ui_register_employee(object):
             print(query4)
         connection_object.commit()
         if(connection_object.is_connected()):
-
             cursor.close()
             connection_object.close()
             print("MySQL connection is closed")
         # switch to another screen
-        __main__.screen_number = 1
+        # __main__.screen_number = 1
+        # app.exit()
+
+    def func(self,idx):
+        __main__.screen_number = idx
         app.exit()
 
 def render():
@@ -453,7 +457,7 @@ def render():
     ui = Ui_register_employee()
     ui.setupUi(register_employee)
     register_employee.show()
-    sys.exit(app.exec_())
+    app.exec_()
     register_employee.close()
 
 

@@ -174,6 +174,7 @@ class Ui_adniministrator_manage_site(object):
 
     def filter(self):
         self.tableWidget.setRowCount(0)
+        self.check_box_list = list()
         site = self.site_comboBox.currentText()
         manager = self.manager_comboBox.currentText()
         open_everyday = self.open_everyday_comboBox.currentText()
@@ -232,24 +233,22 @@ class Ui_adniministrator_manage_site(object):
             print("MySQL connection is closed")
 
     def edit_site(self):
-        # idx = -1
-        # for i in range(len(self.check_box_list)):
-        #     if self.check_box_list[i].isChecked():
-        #         if idx != -1:
-        #             QMessageBox.warning(self.label, 
-        #                             "Invalid Information", 
-        #                             "Only ONE site can be selected", 
-        #                             QMessageBox.Yes, 
-        #                             QMessageBox.Yes)
-        #         else:
-        #             idx = i
-        # if idx == -1:
-        #     return
-        # site_name = self.tableWidget.item(idx,1).text()
-        # manager = self.tableWidget.item(idx,2).text()
-        # print("edit site:" , site_name)
-        site_name = "pp"
-        manager = "David Smith"
+        idx = -1
+        for i in range(len(self.check_box_list)):
+            if self.check_box_list[i].isChecked():
+                if idx != -1:
+                    QMessageBox.warning(self.label, 
+                                    "Invalid Information", 
+                                    "Only ONE site can be selected", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+                else:
+                    idx = i
+        if idx == -1:
+            return
+        site_name = self.tableWidget.item(idx,1).text()
+        manager = self.tableWidget.item(idx,2).text()
+        print("edit site:" , site_name)
         __main__.argv1 = site_name
         __main__.argv2 = manager
         __main__.screen_number = 20

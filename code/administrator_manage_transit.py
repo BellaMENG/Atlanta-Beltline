@@ -203,6 +203,8 @@ class Ui_administrator_manage_transit(object):
             print("MySQL connection is closed")
     
     def filter(self):
+        self.tableWidget.setRowCount(0)
+        self.check_box_list = list()
         transport_type = self.transport_type_comboBox.currentText()
         if transport_type == '--ALL--':
             transport_type = ''

@@ -10,7 +10,7 @@ import __main__
 import mysql.connector
 from PyQt5 import QtCore, QtGui, QtWidgets
 from mysql.connector import pooling
-from helper import isValidEmail
+from helper import isValidEmail,encodeStr,hash_password
 from PyQt5.QtWidgets import QMessageBox
 
 app = QtWidgets.QApplication(sys.argv)
@@ -179,20 +179,20 @@ class Ui_register_user(object):
     def add_email_input(self):
         h = len(self.add_btns)*45 + 25
         self.gridLayoutWidget.setGeometry(QtCore.QRect(220, 320, 271, h))
-        add_btn = QtWidgets.QPushButton(self.gridLayoutWidget)
+        # add_btn = QtWidgets.QPushButton(self.gridLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
-        add_btn.setFont(font)
-        add_btn.setObjectName("add_btn")
+        # add_btn.setFont(font)
+        # add_btn.setObjectName("add_btn")
         self.gridLayout.addWidget(add_btn, len(self.add_btns), 1, 1, 1)
         lineEdit = QtWidgets.QLineEdit(self.gridLayoutWidget)
         lineEdit.setObjectName("lineEdit")
         self.gridLayout.addWidget(lineEdit, len(self.lineEdits), 0, 1, 1)
-        self.add_btns.append(add_btn)
+        # self.add_btns.append(add_btn)
         self.lineEdits.append(lineEdit)
-        _translate = QtCore.QCoreApplication.translate
-        add_btn.setText(_translate("register_visitor", "Add"))
-        add_btn.clicked.connect(self.add_email_input)
+        # _translate = QtCore.QCoreApplication.translate
+        # add_btn.setText(_translate("register_visitor", "Add"))
+        # add_btn.clicked.connect(self.add_email_input)
         
 
     def func(self,idx):
@@ -319,7 +319,7 @@ class Ui_register_user(object):
                     connection_object.close()
                     print("MySQL connection is closed")
         ########################## store info to database##########################
-        #TODO: SQL query to store the input infomation in the database
+        pwd = hash_password(pwd)
         query3 = "insert into user values (\'"+ user_name + "\',\'" + pwd + "\'," + "\'Pending\'" + ",\'" + fname + "\',\'" + lname + "\',\'User\');"
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
@@ -342,9 +342,11 @@ class Ui_register_user(object):
             cursor.close()
             connection_object.close()
             print("MySQL connection is closed")
-        # switch to another screen
-        __main__.screen_number = 1
-        app.exit()
+        
+        QMessageBox.information(self.label,
+                                "Operation Success",
+                                "Operation Success",
+                                QMessageBox.Yes)
     
 def render():
     register_user = QtWidgets.QDialog()

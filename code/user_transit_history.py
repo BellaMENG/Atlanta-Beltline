@@ -168,7 +168,7 @@ class Ui_user_transit_history(object):
         if transport_type == "--ALL--":
             transport_type = ''
         sql = "select take.TransitDate,take.Route,take.TransportType,transit.Price from take join transit on take.Route = transit.Route where transit.TransportType like concat(\'%\',\'"+ transport_type + "\',\'%\') and take.Username like \'" + self.user_name + "\' \
-                and take.TransitDate >= \'" + start_date + "\' and take.TransitDate <= \'" + end_date + "\' and take.Route in (select Route from connect where connect.Name like \'" + contain_site + "\' and connect.Route like concat(\'%\',\'"+ route + "\',\'%\'));"
+                and take.TransitDate >= \'" + start_date + "\' and take.TransitDate <= \'" + end_date + "\' and take.Route in (select Route from connect where connect.Name like \'" + contain_site + "\' and connect.Route =\'"+ route + "\');"
         # print(sql)
         # print(contain_site)
         # print(transport_type)
@@ -233,7 +233,7 @@ def render():
     ui = Ui_user_transit_history()
     ui.setupUi(user_transit_history)
     user_transit_history.show()
-    sys.exit(app.exec_())
+    app.exec_()
     user_transit_history.close()
 
 if __name__ == "__main__":

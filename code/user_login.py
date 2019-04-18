@@ -10,7 +10,7 @@ import __main__
 import mysql.connector
 from PyQt5 import QtCore, QtGui, QtWidgets
 from mysql.connector import pooling
-from helper import isValidEmail
+from helper import isValidEmail,decodeStr,verify_password
 from PyQt5.QtWidgets import QMessageBox
 
 
@@ -118,7 +118,9 @@ class Ui_UserLogin(object):
         user_type = result[0][1]
         status = result[0][2]
         exist = False
-        if password == pwd:
+
+        if verify_password(password,pwd):
+            print("wrong passwd")
             exist = True
         if status == "Declined":
             exist = False
@@ -127,7 +129,6 @@ class Ui_UserLogin(object):
             connection_object.close()
             print("MySQL connection is closed")
         ############################
-
         function_screens = { "User": 7,
                             "Administrator": 8,
                             "Administrator_Visitor":9,
@@ -137,18 +138,26 @@ class Ui_UserLogin(object):
                             "Staff_Visitor":13,
                             "Visitor":14}
         if exist:
-            if user_type == "Administrator" :
-                if self.isVisitor(user_name):
-                    user_type = "Administrator_Visitor"
-            if user_type == "Manager":
-                if self.isVisitor(user_name):
-                    user_type = "Manager_Visitor"
-            if user_type == "Staff":
-                if self.isVisitor(user_name):
-                    user_type = "Staff_Visitor"
+            if user_type == "User":
+                __main__.user_type = "User"
+            elif self.isVisitor(user_name):
+                if self.isManager(user_name):
+                    __main__.user_type = "Manager_Visitor"
+                elif self.isStaff(user_name):
+                    __main__.user_type = "Staff_Visitor"
+                elif self.isAdmin(user_name):
+                    __main__.user_type = "Administrator_Visitor"
+                else:
+                    __main__.user_type = "Visitor"
+            else:
+                if self.isManager(user_name):
+                    __main__.user_type = "Manager"
+                elif self.isStaff(user_name):
+                    __main__.user_type = "Staff"
+                elif self.isAdmin(user_name):
+                    __main__.user_type = "Administrator"
             
             __main__.logged_user = user_name
-            __main__.user_type = user_type
             __main__.screen_number = function_screens[user_type]
             app.exit()
         else:
@@ -178,6 +187,66 @@ class Ui_UserLogin(object):
         else:
             return True
 
+    def isManager(self,user_name):
+        query1 = "SELECT count(*) FROM manager WHERE Username = \'" + user_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if result[0][0] == 0:
+            return False
+        else:
+            return True
+    
+    def isAdmin(self,user_name):
+        query1 = "SELECT count(*) FROM administrator WHERE Username = \'" + user_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if result[0][0] == 0:
+            return False
+        else:
+            return True
+    
+    def isStaff(self,user_name):
+        query1 = "SELECT count(*) FROM staff WHERE Username = \'" + user_name + "\';"
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if result[0][0] == 0:
+            return False
+        else:
+            return True
+     
 
     def register(self):
         __main__.screen_number = 2

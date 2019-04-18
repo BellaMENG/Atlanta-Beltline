@@ -1,4 +1,16 @@
 import re
+import base64
+
+def encodeStr(s):
+    return base64.b64encode(s.encode('utf-8'))
+
+def decodeStr(b):
+    # print(b)
+    # print(type(b))
+    b = str.encode(b)
+    # print(type(b))
+    # print(b[2:-1])
+    return base64.b64decode(b[2:-1]).decode('utf-8')
 
 def isValidEmail(email):
     return bool(re.search(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", email))
@@ -42,6 +54,27 @@ def isValidZipcode(zipcode):
     else:
         return False
 
-print(isValidPhone('123-123-1234'))
-print(isValidPhone('123-123-123'))
-print(isValidPhone('123-11223-1234'))
+import hashlib, binascii, os
+
+def hash_password(password):
+    """Hash a password for storing."""
+    salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
+    pwdhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), 
+                                salt, 100000)
+    pwdhash = binascii.hexlify(pwdhash)
+    return (salt + pwdhash).decode('ascii')
+
+def verify_password(stored_password, provided_password):
+    """Verify a stored password against one provided by user"""
+    print(provided_password)
+    salt = stored_password[:64]
+    stored_password = stored_password[64:]
+    pwdhash = hashlib.pbkdf2_hmac('sha512', 
+                                  provided_password.encode('utf-8'), 
+                                  salt.encode('ascii'), 
+                                  100000)
+    pwdhash = binascii.hexlify(pwdhash).decode('ascii')
+    print(pwdhash)
+    return pwdhash == stored_password
+
+print(len(hash_password("qwueydjclvkvjsiflmcps")))

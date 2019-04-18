@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt
 import __main__
 import sys
 import mysql.connector
+from PyQt5.QtWidgets import QMessageBox
 
 app = QtWidgets.QApplication(sys.argv)
 
@@ -162,6 +163,7 @@ class Ui_user_take_transit(object):
             print("MySQL connection is closed")
 
     def filter(self):
+        self.check_box_list = list()
         self.tableWidget.setRowCount(0)
         contain_site = self.site_combobox.currentText()
         transport_type = self.transport_type_combobox.currentText()
@@ -185,7 +187,7 @@ class Ui_user_take_transit(object):
                  host="localhost",       # 数据库主机地址
                 user="root",    # 数据库用户名
                 passwd='',
-                database = 'Beltline'
+                database = 'beltline_version2'
                 )
         cursor = mydb.cursor()
         sql = "call get_transit_options(\'"+ contain_site+ "\',\'"+ transport_type+"\',"+str(min_price)+","+str(max_price)+");"
@@ -225,13 +227,7 @@ class Ui_user_take_transit(object):
         info = list()
         info.append(self.user_name)
         date = self.dateEdit.date()
-        if self.hasTakenTransit(date):
-            QMessageBox.warning(self.label, 
-                                    "Log Error", 
-                                    "Can not register multiple transit in one day", 
-                                    QMessageBox.Yes, 
-                                    QMessageBox.Yes)
-            return
+        
 
         for i in range(len(self.check_box_list)):
             if self.check_box_list[i].isChecked():
@@ -252,6 +248,15 @@ class Ui_user_take_transit(object):
                                     QMessageBox.Yes)
             return
         else:
+            route = self.tableWidget.item(idx ,1).text()
+            transport_type = self.tableWidget.item(idx ,2).text()
+            if self.hasTakenTransit(date,route,transport_type):
+                QMessageBox.warning(self.label, 
+                                    "Log Error", 
+                                    "Can not register multiple transit in one day", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+                return
             info.append(self.tableWidget.item(idx ,2).text())
             info.append(self.tableWidget.item(idx ,1).text())
             formatted_date = date.toString(Qt.ISODate)
@@ -270,9 +275,9 @@ class Ui_user_take_transit(object):
                 connection_object.close()
                 print("MySQL connection is closed")
     
-    def hasTakenTransit(self,date):
+    def hasTakenTransit(self,date,route,transport_type):
         formatted_date = date.toString(Qt.ISODate)
-        query1 = "SELECT count(*) FROM take WHERE Username = \'" + self.user_name + "\' and TransitDate = \'" + formatted_date + "\';" 
+        query1 = "SELECT count(*) FROM take WHERE Username = \'" + self.user_name + "\' and TransitDate = \'" + formatted_date + "\' and Route = \'" + route + "\' and TransportType = \'"+ transport_type + "\';" 
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()
