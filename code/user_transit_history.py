@@ -115,10 +115,40 @@ class Ui_user_transit_history(object):
         self.back_btn.setFont(font)
         self.back_btn.setObjectName("back_btn")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
-        self.tableWidget.setGeometry(QtCore.QRect(110, 240, 551, 251))
+        self.tableWidget.setGeometry(QtCore.QRect(30, 240, 551, 251))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
+        self.formLayoutWidget_3 = QtWidgets.QWidget(self.centralwidget)
+        self.formLayoutWidget_3.setGeometry(QtCore.QRect(590, 240, 191, 80))
+        self.formLayoutWidget_3.setObjectName("formLayoutWidget_3")
+        self.formLayout_3 = QtWidgets.QFormLayout(self.formLayoutWidget_3)
+        self.formLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.formLayout_3.setObjectName("formLayout_3")
+        self.sortByLabel = QtWidgets.QLabel(self.formLayoutWidget_3)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.sortByLabel.setFont(font)
+        self.sortByLabel.setObjectName("sortByLabel")
+        self.formLayout_3.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.sortByLabel)
+        self.sortbyComboBox = QtWidgets.QComboBox(self.formLayoutWidget_3)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.sortbyComboBox.setFont(font)
+        self.sortbyComboBox.setObjectName("sortbyComboBox")
+        self.formLayout_3.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.sortbyComboBox)
+        self.orderLabel = QtWidgets.QLabel(self.formLayoutWidget_3)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.orderLabel.setFont(font)
+        self.orderLabel.setObjectName("orderLabel")
+        self.formLayout_3.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.orderLabel)
+        self.orderComboBox = QtWidgets.QComboBox(self.formLayoutWidget_3)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.orderComboBox.setFont(font)
+        self.orderComboBox.setObjectName("orderComboBox")
+        self.formLayout_3.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.orderComboBox)
         user_transit_history.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(user_transit_history)
         self.statusbar.setObjectName("statusbar")
@@ -138,9 +168,16 @@ class Ui_user_transit_history(object):
         self.endDateLabel.setText(_translate("user_transit_history", "End Date"))
         self.filter_btn.setText(_translate("user_transit_history", "Filter"))
         self.back_btn.setText(_translate("user_transit_history", "Back"))
+        self.sortByLabel.setText(_translate("user_transit_history", "SortBy"))
+        self.orderLabel.setText(_translate("user_transit_history", "Order"))
 
         type_list = ['--ALL--','MARTA','Bus','Bike']
         self.transportTypeComboBox.addItems(type_list)
+        order_list = ['ASC','DESC']
+        self.orderComboBox.addItems(order_list)
+
+        col_list = ["take.TransitDate","take.Route","take.TransportType","transit.Price"]
+        self.sortbyComboBox.addItems(col_list)
 
         self.site_list = list()
         self.get_sites()
@@ -159,17 +196,26 @@ class Ui_user_transit_history(object):
 
 
     def filter(self):
+
         self.tableWidget.setRowCount(0)
         contain_site = self.containSiteComboBox.currentText()
         transport_type = self.transportTypeComboBox.currentText()
         route = self.routeLineEdit.text()
         end_date = self.endDateDateEdit.date().toString(Qt.ISODate)
         start_date = self.startDateDateEdit.date().toString( Qt.ISODate)
+        order = self.orderComboBox.currentText()
+        orderby = self.sortbyComboBox.currentText()
         if transport_type == "--ALL--":
             transport_type = ''
-        sql = "select take.TransitDate,take.Route,take.TransportType,transit.Price from take join transit on take.Route = transit.Route where transit.TransportType like concat(\'%\',\'"+ transport_type + "\',\'%\') and take.Username like \'" + self.user_name + "\' \
-                and take.TransitDate >= \'" + start_date + "\' and take.TransitDate <= \'" + end_date + "\' and take.Route in (select Route from connect where connect.Name like \'" + contain_site + "\' and connect.Route =\'"+ route + "\');"
-        # print(sql)
+        if route:
+            sql = "select take.TransitDate,take.Route,take.TransportType,transit.Price from take join transit on take.Route = transit.Route where transit.TransportType like concat(\'%\',\'"+ transport_type + "\',\'%\') and take.Username like \'" + self.user_name + "\' \
+                and take.TransitDate >= \'" + start_date + "\' and take.TransitDate <= \'" + end_date + "\' and take.Route in (select Route from connect where connect.Name like \'" + contain_site + "\' and connect.Route =\'"+ route + "\')\
+                order by "+ orderby + " "+ order +";"
+        else:
+            sql = "select take.TransitDate,take.Route,take.TransportType,transit.Price from take join transit on take.Route = transit.Route where transit.TransportType like concat(\'%\',\'"+ transport_type + "\',\'%\') and take.Username like \'" + self.user_name + "\' \
+                and take.TransitDate >= \'" + start_date + "\' and take.TransitDate <= \'" + end_date + "\' and take.Route in (select Route from connect where connect.Name like \'" + contain_site + "\')\
+                order by "+ orderby + " "+ order +";"
+        print(sql)
         # print(contain_site)
         # print(transport_type)
         # print(start_date)

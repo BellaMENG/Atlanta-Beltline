@@ -161,6 +161,8 @@ class Ui_administrator_manage_transit(object):
         self.edit_btn.setText(_translate("administrator_manage_transit", "Edit"))
         self.delete_btn.setText(_translate("administrator_manage_transit", "Delete"))
         self.back_btn.setText(_translate("administrator_manage_transit", "Back"))
+        self.sortByLabel.setText(_translate("administrator_manage_transit", "SortBy"))
+        self.orderLabel.setText(_translate("administrator_manage_transit", "Order"))
 
         self.tableWidget.setColumnCount(6)
         self.tableWidget.setHorizontalHeaderLabels(['Selected','      Route       ','    Transport Type     ','    Price     ','  # Connected Sites  ','  # Transit Logged  '])
@@ -170,6 +172,13 @@ class Ui_administrator_manage_transit(object):
         self.tableWidget.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(4,QHeaderView.ResizeToContents)
         self.tableWidget.horizontalHeader().setSectionResizeMode(5,QHeaderView.ResizeToContents)
+        
+
+        order_list = ['ASC','DESC']
+        self.orderComboBox.addItems(order_list)
+
+        col_list = ["t.Route", "t.TransportType", "t.Price","c.c_count" , "l.l_count"]
+        self.sortByComboBox.addItems(col_list)
 
         self.check_box_list = list()
         self.site_list = list()
@@ -181,7 +190,7 @@ class Ui_administrator_manage_transit(object):
         self.create_btn.clicked.connect(self.create_transit)
         self.edit_btn.clicked.connect(self.edit_transit)
         self.delete_btn.clicked.connect(self.delete_transit)
-        self.back_btn.clicked.connect(lambda:self.func(idx=1))
+        self.back_btn.clicked.connect(self.back)
 
     def get_sites(self):
         query1 = "SELECT DISTINCT Name FROM connect;" 
@@ -223,11 +232,13 @@ class Ui_administrator_manage_transit(object):
         if route:
             sql = "select t.Route, t.TransportType, t.Price ,c.c_count , l.l_count from transit as t join (select count(*) as c_count , Route from connect group by Route) as c on c.Route = t.Route \
 join (select count(*) as l_count, Route  from take group by Route) as l on t.Route = l.Route \
-where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.TransportType like concat(\'%\',\'" + transport_type +"\',\'%\') and t.Route in (select Route from connect where Name like concat(\'%\',\'"+ contain_site +"\',\'%\')) and t.Route = \'" + route + "\';"
+where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.TransportType like concat(\'%\',\'" + transport_type +"\',\'%\') and t.Route in (select Route from connect where Name like concat(\'%\',\'"+ contain_site +"\',\'%\')) and t.Route = \'" + route + "\' \
+ order by "+ sortby + " " + order + " ;"
         else:
             sql = "select t.Route, t.TransportType, t.Price ,c.c_count , l.l_count from transit as t join (select count(*) as c_count , Route from connect group by Route) as c on c.Route = t.Route \
 join (select count(*) as l_count, Route  from take group by Route) as l on t.Route = l.Route \
-where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.TransportType like concat(\'%\',\'" + transport_type +"\',\'%\') and t.Route in (select Route from connect where Name like concat(\'%\',\'"+ contain_site +"\',\'%\')) ;"
+where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.TransportType like concat(\'%\',\'" + transport_type +"\',\'%\') and t.Route in (select Route from connect where Name like concat(\'%\',\'"+ contain_site +"\',\'%\')) \
+ order by "+ sortby + "  " + order + " ;"
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()
@@ -249,6 +260,7 @@ where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.Transport
         route,transport_type,price,connected_sites,transit_logged = row
         #route,transport_type,price,connected_sites = ['816','Bus','2.5','3']
         connected_sites = str(connected_sites)
+        transit_logged = str(transit_logged)
         price = str(price)
         row_count = self.tableWidget.rowCount()
         self.tableWidget.setRowCount(row_count + 1)
@@ -291,8 +303,11 @@ where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.Transport
             return
         else:
             route = self.tableWidget.item(idx ,1).text()
+            transport_type = self.tableWidget.item(idx ,2).text()
+            price = self.tableWidget.item(idx ,3).text()
             __main__.argv1 = route
-            __main__.argv2 = None
+            __main__.argv3 = price
+            __main__.argv2 = transport_type
             self.func(idx = 23)
     
     def delete_transit(self):
@@ -317,6 +332,7 @@ where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.Transport
             return
         else:
             route = self.tableWidget.item(idx ,1).text()
+            transport_type = self.tableWidget.item(idx ,2).text()
             connection_object = __main__.connection_pool.get_connection()
             if connection_object.is_connected():
                 db_Info = connection_object.get_server_info()
@@ -324,11 +340,11 @@ where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.Transport
             else:
                 print("user_login.py login() Not Connected ")
             cursor = connection_object.cursor()
-            sql1 = "delete from transit where Route = \'" + route + "\';"
+            sql1 = "delete from transit where Route = \'" + route + "\' and TransportType like concat(\'%\',\'" + transport_type +"\',\'%\');"
             cursor.execute(sql1)
-            sql2 = "delete from take where Route = \'" + route + "\';"
+            sql2 = "delete from take where Route = \'" + route + "\' and TransportType like concat(\'%\',\'" + transport_type +"\',\'%\');"
             cursor.execute(sql2)
-            sql3 = "delete from connect where Route = \'" + route + "\';"
+            sql3 = "delete from connect where Route = \'" + route + "\' and TransportType like concat(\'%\',\'" + transport_type +"\',\'%\');"
             cursor.execute(sql3)
             connection_object.commit()
             if(connection_object.is_connected()):
@@ -340,6 +356,14 @@ where t.Price >= " + min_price +" and t.Price <= "+ max_price +" and t.Transport
 
     def func(self,idx):
         __main__.screen_number = idx
+        app.exit()
+
+    def back(self):
+        function_screens = {
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            }
+        __main__.screen_number = function_screens[__main__.user_type]
         app.exit()
 
 

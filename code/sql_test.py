@@ -66,4 +66,23 @@ def isManager(suser_name):
 # print(type(result[0][0]))
 # print(result[0][0])
 
-print(isManager(user_name))
+sql = "select transit.Route, transit.TransportType, price, connect.count(*) \
+from connect join transit on connect.Route = transit.Route \
+where transit.TransportType like concat(\'%\',\'" + "" + "\',\'%\') and transit.price >= " + "0" + " and transit.price <= " + "1000" + " and connect.Name like concat(\'%\',\'"+"Atlanta Beltline Center" +"\',\'%\') \
+group by transit.Route order by " + sortby + " " + order + ";"
+print(sql)
+connection_object = connection_pool.get_connection()
+if connection_object.is_connected():
+    db_Info = connection_object.get_server_info()
+    print("user_login.py login() Connected to MySQL server: ",db_Info)
+else:
+    print("user_login.py login() Not Connected ")
+cursor = connection_object.cursor()
+cursor.execute(sql)
+result = cursor.fetchall()
+for row in result:
+    print(row)
+if(connection_object.is_connected()):
+    cursor.close()
+    connection_object.close()
+    print("MySQL connection is closed")

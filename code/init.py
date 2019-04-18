@@ -6,6 +6,11 @@ from mysql.connector import pooling
 user_type = None
 screen_number = None
 logged_user = None
+Quit = False
+argv1 = None
+argv2 = None
+argv3 = None
+
 
 import user_login,register_navigation,register_user,register_visitor,register_employee,register_employee_v
 import user_functionality,admin_functionality,admin_functionality_v,manager_functionality,manager_functionality_v,staff_functionality,staff_functionality_v,visitor_functionality
@@ -33,16 +38,16 @@ if __name__ == "__main__":
     # administrator_create_transit.render()
     # print("screen number after test page:",screen_number)
 
-    # user_login.render()
-    # print("screen number after user_login:",screen_number)
-    # print("user type after user_login:",user_type)
-    # print("user name after user_login",logged_user)
+    user_login.render()
+    print("screen number after user_login:",screen_number)
+    print("user type after user_login:",user_type)
+    print("user name after user_login",logged_user)
 
-    user_type = "Administrator"
-    logged_user = 'james.smith'
-    screen_number = 8
+    # user_type = "Administrator"
+    # logged_user = 'james.smith'
+    # screen_number = 8
 
-    while True:
+    while not Quit:
         print("loop running ",screen_number)
         if screen_number == 1:
             user_login.render()

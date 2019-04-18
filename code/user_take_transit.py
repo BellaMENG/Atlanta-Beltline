@@ -47,7 +47,6 @@ class Ui_user_take_transit(object):
         self.site_combobox.setFont(font)
         self.site_combobox.setObjectName("site_combobox")
         self.transport_type_combobox = QtWidgets.QComboBox(self.centralwidget)
-        self.transport_type_combobox.setFont(font)
         self.transport_type_combobox.setGeometry(QtCore.QRect(550, 90, 181, 23))
         self.transport_type_combobox.setObjectName("transport_type_combobox")
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
@@ -75,7 +74,7 @@ class Ui_user_take_transit(object):
         self.filter_btn.setFont(font)
         self.filter_btn.setObjectName("filter_btn")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
-        self.tableWidget.setGeometry(QtCore.QRect(40, 220, 691, 291))
+        self.tableWidget.setGeometry(QtCore.QRect(0, 210, 581, 291))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
@@ -94,12 +93,30 @@ class Ui_user_take_transit(object):
         self.dateEdit = QtWidgets.QDateEdit(self.centralwidget)
         self.dateEdit.setGeometry(QtCore.QRect(360, 530, 131, 31))
         self.dateEdit.setObjectName("dateEdit")
-        self.log_transit_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.log_transit_btn.setGeometry(QtCore.QRect(580, 520, 141, 41))
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton.setGeometry(QtCore.QRect(580, 520, 141, 41))
         font = QtGui.QFont()
         font.setPointSize(14)
-        self.log_transit_btn.setFont(font)
-        self.log_transit_btn.setObjectName("log_transit_btn")
+        self.pushButton.setFont(font)
+        self.pushButton.setObjectName("pushButton")
+        self.formLayoutWidget = QtWidgets.QWidget(self.centralwidget)
+        self.formLayoutWidget.setGeometry(QtCore.QRect(600, 220, 181, 80))
+        self.formLayoutWidget.setObjectName("formLayoutWidget")
+        self.formLayout = QtWidgets.QFormLayout(self.formLayoutWidget)
+        self.formLayout.setContentsMargins(0, 0, 0, 0)
+        self.formLayout.setObjectName("formLayout")
+        self.sortByLabel = QtWidgets.QLabel(self.formLayoutWidget)
+        self.sortByLabel.setObjectName("sortByLabel")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.sortByLabel)
+        self.sortByComboBox = QtWidgets.QComboBox(self.formLayoutWidget)
+        self.sortByComboBox.setObjectName("sortByComboBox")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.sortByComboBox)
+        self.orderLabel = QtWidgets.QLabel(self.formLayoutWidget)
+        self.orderLabel.setObjectName("orderLabel")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.orderLabel)
+        self.orderComboBox = QtWidgets.QComboBox(self.formLayoutWidget)
+        self.orderComboBox.setObjectName("orderComboBox")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.orderComboBox)
         user_take_transit.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(user_take_transit)
         self.statusbar.setObjectName("statusbar")
@@ -128,17 +145,23 @@ class Ui_user_take_transit(object):
         self.filter_btn.setText(_translate("user_take_transit", "Filter"))
         self.back_btn.setText(_translate("user_take_transit", "Bcak"))
         self.label_6.setText(_translate("user_take_transit", "Transit Date"))
-        self.log_transit_btn.setText(_translate("user_take_transit", "Log Transit"))
+        self.pushButton.setText(_translate("user_take_transit", "Log Transit"))
 
         type_list = ['--ALL--','MARTA','Bus','Bike']
         self.transport_type_combobox.addItems(type_list)
+
+        order_list = ['ASC','DESC']
+        self.orderComboBox.addItems(order_list)
+
+        col_list = ["t.Route" , "t.TransportType" ,"t.Price", "c.count"]
+        self.sortByComboBox.addItems(col_list)
 
         self.site_list = list()
         self.get_sites()
         self.site_combobox.addItems(self.site_list)
 
         self.filter_btn.clicked.connect(self.filter)
-        self.log_transit_btn.clicked.connect(self.log_transit)
+        self.pushButton.clicked.connect(self.log_transit)
         self.check_box_list = list()
         self.user_name = __main__.logged_user
         self.back_btn.clicked.connect(self.back)
@@ -180,28 +203,34 @@ class Ui_user_take_transit(object):
             max_price = float(max_price)
         if transport_type == "--ALL--":
             transport_type = ''
-        print(contain_site)
-        print(transport_type)
-        print(min_price)
-        print(max_price)
-        mydb = mysql.connector.connect(
-                 host="localhost",       # 数据库主机地址
-                user="root",    # 数据库用户名
-                passwd='',
-                database = 'beltline_version2'
-                )
-        cursor = mydb.cursor()
-        sql = "call get_transit_options(\'"+ contain_site+ "\',\'"+ transport_type+"\',"+str(min_price)+","+str(max_price)+");"
+        # print(contain_site)
+        # print(transport_type)
+        # print(min_price)
+        # print(max_price)
+        sortby = self.sortByComboBox.currentText()
+        order = self.orderComboBox.currentText()
+
+        sql = "select t.Route , t.TransportType ,t.Price, c.count from transit as t join (select count(*) as count, Route , Name  from connect   group by Route) as c on t.Route = c.Route \
+where c.Name like concat(\'%\',\'"+contain_site+"\',\'%\') and t.TransportType like concat(\'%\',\'"+ transport_type+"\',\'%\') and t.Price >= "+ str(min_price) + " and t.Price <= " + str(max_price) + " \
+order by " + sortby + " " + order +" ;"
         print(sql)
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
         cursor.execute(sql)
         result = cursor.fetchall()
         for row in result:
             print(row)
             self.add_line(row)
-        if(mydb.is_connected()):
+        if(connection_object.is_connected()):
             cursor.close()
-            mydb.close()
+            connection_object.close()
             print("MySQL connection is closed")
+       
 
     def add_line(self,row):
         route,transport_type,price,connected_sites = row
@@ -296,7 +325,7 @@ class Ui_user_take_transit(object):
             return False
         else:
             return True
-    
+
     def back(self):
         function_screens = { "User": 7,
                             "Administrator": 8,
@@ -314,7 +343,7 @@ def render():
     ui = Ui_user_take_transit()
     ui.setupUi(user_take_transit)
     user_take_transit.show()
-    sys.exit(app.exec_())
+    app.exec_()
 
 if __name__ == "__main__":
     import sys

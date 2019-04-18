@@ -231,6 +231,11 @@ class Ui_administrator_edit_site(object):
             print("MySQL connection is closed")
     
     def back(self):
+        function_screens = {
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            }
+        __main__.screen_number = function_screens[__main__.user_type]
         app.exit()
 
 def render(site_name,manager):

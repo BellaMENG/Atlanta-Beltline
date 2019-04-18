@@ -138,7 +138,7 @@ class Ui_administrator_edit_transit(object):
         self.routeLineEdit.setText(self.route)
         self.priceLineEdit.setText(str(self.price))
         self.update_btn.clicked.connect(self.update)
-        self.back_btn.clicked.connect(lambda:self.func(idx=1))
+        self.back_btn.clicked.connect(self.back)
 
     def update(self):
         route = self.routeLineEdit.text()
@@ -201,7 +201,7 @@ class Ui_administrator_edit_transit(object):
         
 
     def get_sites(self):
-        query1 = "SELECT DISTINCT Name FROM connect;" 
+        query1 = "SELECT DISTINCT Name FROM site;" 
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()
@@ -220,7 +220,7 @@ class Ui_administrator_edit_transit(object):
             print("MySQL connection is closed")
         
     def get_routed_sites(self):
-        query1 = "SELECT DISTINCT Name FROM connect where Route = \'" + self.route +"\';" 
+        query1 = "SELECT DISTINCT Name FROM connect where Route = \'" + self.route +"\' and  TransportType like concat(\'%\',\'" + self.transport_type +"\',\'%\');" 
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()
@@ -263,6 +263,14 @@ class Ui_administrator_edit_transit(object):
     def func(self,idx):
             __main__.screen_number = idx
             app.exit()
+    
+    def back(self):
+        function_screens = {
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            }
+        __main__.screen_number = function_screens[__main__.user_type]
+        app.exit()
 
 def render(route,transport_type,price):
     administrator_edit_transit = QtWidgets.QMainWindow()

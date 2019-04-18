@@ -9,6 +9,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget,QHBoxLayout,QTableWidget,QPushButton,QApplication,QVBoxLayout,QTableWidgetItem,QCheckBox,QAbstractItemView,QHeaderView,QLabel,QFrame
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox
 import sys
 import __main__
 
@@ -160,7 +161,7 @@ class Ui_administrator_manage_user(object):
         self.filter_btn.clicked.connect(self.filter)
         self.approve_btn.clicked.connect(lambda:self.modify_users(op=1))
         self.decline_btn.clicked.connect(lambda:self.modify_users(op=2))
-        self.back_btn.clicked.connect(lambda:self.func(idx=1))
+        self.pushButton.clicked.connect(self.back)
 
     def filter(self):
         self.tableWidget.setRowCount(0)
@@ -263,17 +264,22 @@ order by " + order_col + " " + order + ";"
                     cursor.close()
                     connection_object.close()
                     print("MySQL connection is closed")
-
-        def func(self,idx):
-            __main__.screen_number = idx
-            app.exit()
         
+    def back(self):
+        function_screens = {
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            }
+        __main__.screen_number = function_screens[__main__.user_type]
+        app.exit()
+
+
 def render():
     administrator_manage_user = QtWidgets.QMainWindow()
     ui = Ui_administrator_manage_user()
     ui.setupUi(administrator_manage_user)
     administrator_manage_user.show()
-    sys.exit(app.exec_())
+    app.exec_()
     administrator_manage_user.close()
 
 if __name__ == "__main__":

@@ -127,6 +127,7 @@ class Ui_administrator_create_site(object):
         self.get_managers()
         self.managerComboBox.addItems(self.manager_list)
         self.update_btn.clicked.connect(self.update)
+        self.back_btn.clicked.connect(self.back)
 
 
     def get_managers(self):
@@ -228,6 +229,14 @@ class Ui_administrator_create_site(object):
             return False
         else:
             return True
+    
+    def back(self):
+        function_screens = {
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            }
+        __main__.screen_number = function_screens[__main__.user_type]
+        app.exit()
 
 def render():
     administrator_create_site = QtWidgets.QMainWindow()

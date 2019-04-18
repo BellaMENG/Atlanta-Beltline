@@ -169,7 +169,7 @@ class Ui_adniministrator_manage_site(object):
         self.filter_btn.clicked.connect(self.filter)
         self.delete_btn.clicked.connect(self.delete_site)
         self.edit_btn.clicked.connect(self.edit_site)
-        self.back_btn.clicked.connect(lambda:self.func(idx=1))
+        self.back_btn.clicked.connect(self.back)
         #self.create_btn.clicked.connect(self.add_line)
 
     def filter(self):
@@ -311,6 +311,14 @@ class Ui_adniministrator_manage_site(object):
 
     def func(self,idx):
         __main__.screen_number = idx
+        app.exit()
+
+    def back(self):
+        function_screens = {
+                            "Administrator": 8,
+                            "Administrator_Visitor":9,
+                            }
+        __main__.screen_number = function_screens[__main__.user_type]
         app.exit()
 
 def render():
