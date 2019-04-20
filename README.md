@@ -24,4 +24,6 @@ activate your conda environment
 run init.py file  
 </p>python init.py</p>
 
+change the user of the logging in info of mysql in initial.py/init.py 
+
 
