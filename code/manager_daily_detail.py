@@ -95,7 +95,6 @@ class Ui_MainWindow(object):
         event_sdates = [row[1] for row in result]
         event_prices = [row[2] for row in result]
 
-        staff_list = list()
         visit_num = list()
         price_list = list()
         for i in range(len(event_names)):
@@ -110,7 +109,6 @@ class Ui_MainWindow(object):
             for row in result:
                 staff_names += row[0]
                 staff_names += '  '
-            staff_list.append(staff_names)
 
             query = "select count(*) from visit_event " \
                     "where Name = \'" + event_names[i] + "\' " \
@@ -125,7 +123,7 @@ class Ui_MainWindow(object):
             price_list.append(float(event_prices[i]) * int(visit_num[i]))
 
         for i in range(len(event_names)):
-            row = [event_names[i], staff_names[i], visit_num[i], price_list[i]]
+            row = [event_names[i], staff_names, visit_num[i], price_list[i]]
             self.add_lines(row)
 
     def retrieve_from_db(self, query):

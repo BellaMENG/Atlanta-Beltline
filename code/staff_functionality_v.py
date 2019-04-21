@@ -105,7 +105,7 @@ class Ui_staff_functionality_v(object):
         self.view_transit_history_btn.clicked.connect(lambda:self.func(16))
         self.explore_event_btn.clicked.connect(lambda:self.func(33))
         self.explore_site_btn.clicked.connect(lambda:self.func(35))
-        self.view_visit_history_btn.clicked.connect(lambda:self.func(16))
+        self.view_visit_history_btn.clicked.connect(lambda:self.func(38))
         self.back_btn.clicked.connect(lambda:self.func(1))
 
     def func(self,idx):
@@ -117,7 +117,7 @@ def render():
     ui = Ui_staff_functionality_v()
     ui.setupUi(staff_functionality_v)
     staff_functionality_v.show()
-    sys.exit(app.exec_())
+    app.exec_()
     staff_functionality_v.close()
 
 
