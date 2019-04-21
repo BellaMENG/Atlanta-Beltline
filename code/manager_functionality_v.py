@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
+from PyQt5.QtWidgets import QMessageBox
 import __main__
 
 app = QtWidgets.QApplication(sys.argv)
@@ -113,14 +114,62 @@ class Ui_manager_functionality_v(object):
         self.back_btn.setText(_translate("manager_functionality_v", "Back"))
         self.label.setText(_translate("manager_functionality_v", "Manager Functionality"))
 
+        self.user_name = __main__.logged_user
+        query = "select Name from site where Manager = \'" + self.user_name + "\';"
+        self.result = self.retrieve_from_db(query)
+
         self.manage_profile_btn.clicked.connect(lambda:self.func(17))
-        self.view_staff_btn.clicked.connect(lambda:self.func(28))
+        self.view_staff_btn.clicked.connect(self.view_staff)
         self.explore_site_btn.clicked.connect(lambda:self.func(35))
         self.take_transit_btn.clicked.connect(lambda:self.func(15))
         self.view_visit_history_btn.clicked.connect(lambda:self.func(16))
-        self.manag_event_btn.clicked.connect(lambda:self.func(25))
-        self.view_stie_report_btn.clicked.connect(lambda:self.func(29))
+        self.manag_event_btn.clicked.connect(self.manage_event)
+        self.view_stie_report_btn.clicked.connect(self.view_site_report)
         self.explore_event_btn.clicked.connect(lambda:self.func(33))
+
+    def manage_event(self):
+        if len(self.result) == 0:
+            self.msgDialog("You are not managing sites!")
+            return
+        self.func(idx=25)
+
+    def view_staff(self):
+        if len(self.result) == 0:
+            self.msgDialog("You are not managing sites!")
+            return
+        self.func(idx=28)
+
+    def view_site_report(self):
+        if len(self.result) == 0:
+            self.msgDialog("You are not managing sites!")
+            return
+        self.func(idx=29)
+
+    def retrieve_from_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        return result
+
+    def msgDialog(self, m):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Sorry!")
+        msg.setInformativeText("This action is not allowed.")
+        msg.setWindowTitle("Not allowed")
+        msg.setDetailedText(m)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def func(self,idx):
         __main__.screen_number = idx

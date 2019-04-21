@@ -256,6 +256,11 @@ class Ui_MainWindow(object):
         self.filterResultTable.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
         self.filterResultTable.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
 
+        self.user_name = __main__.logged_user
+        query = "select Name from site where Manager = \'" + self.user_name + "\';"
+        self.result = self.retrieve_from_db(query)
+        self.site_name = self.result[0][0]
+
         self.filterButton.clicked.connect(self.filter)
         self.createButton.clicked.connect(lambda: self.func(idx=27))
         self.viewOrEditButton.clicked.connect(self.viewOrEdit)
@@ -303,17 +308,13 @@ class Ui_MainWindow(object):
         sdate = self.sdateEdit.date().toString(Qt.ISODate)
         edate = self.edateEdit.date().toString(Qt.ISODate)
 
-        # TODO:
         query1 = "select Name, StartDate, SiteName, datediff(EndDate, StartDate) + 1, Price " \
                  "from event where Name like \'%" + event_name + "%\' " \
                  "and Description like \'%" + keyword + "%\' " \
                  "and StartDate >= \'" + sdate + "\' " \
-                 "and EndDate <= \'" + edate + "\';"
+                 "and EndDate <= \'" + edate + "\' and SiteName = \'" + self.site_name + "\';"
 
-        print("query 1: ", query1)
         result = self.retrieve_from_db(query1)
-        print(result)
-
         for row in result:
             name, start_date, site_name, duration, price = row
             query = "select count(UserName) from assign_to join event " \
@@ -340,10 +341,6 @@ class Ui_MainWindow(object):
 
     def selected_row(self):
         rowPos = self.filterResultTable.currentRow()
-        print("current row number:", rowPos)
-        print("current row name:", self.filterResultTable.item(rowPos, 0).text())
-        print("current row sdate:", self.filterResultTable.item(rowPos, 5).text())
-        print("current row siteName:", self.filterResultTable.item(rowPos, 6).text())
         # event.Name, event.StartDate, event.SiteName
         __main__.selected_event25 = [self.filterResultTable.item(rowPos, 0).text(),
                                      self.filterResultTable.item(rowPos, 5).text(),
@@ -445,6 +442,7 @@ class Ui_MainWindow(object):
         app.exit()
 
 def render():
+    __main__.selected_event25 = None
     manager_manage_event = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(manager_manage_event)

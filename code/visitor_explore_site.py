@@ -369,6 +369,7 @@ class Ui_MainWindow(object):
 
 
 def render():
+    __main__.selected_site35 = None
     visitor_explore_site = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(visitor_explore_site)

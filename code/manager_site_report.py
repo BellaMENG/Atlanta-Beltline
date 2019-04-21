@@ -453,6 +453,8 @@ class Ui_MainWindow(object):
 
 
 def render():
+    __main__.selected_date29 = None
+    __main__.site_name29 = None
     manager_site_report = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(manager_site_report)

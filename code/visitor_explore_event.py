@@ -377,6 +377,7 @@ class Ui_MainWindow(object):
         msg.exec_()
 
 def render():
+    __main__.selected_event33 = None
     visitor_explore_event = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(visitor_explore_event)
