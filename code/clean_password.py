@@ -9,7 +9,7 @@ if __name__ == "__main__":
                                                                    pool_reset_session = True,
                                                                    host = 'localhost',
                                                                    database = 'beltline_version2',
-                                                                   user = 'root',
+                                                                   user = 'bella',
                                                                    password = '',
                                                                    use_pure = True)
     connection_object = connection_pool.get_connection()

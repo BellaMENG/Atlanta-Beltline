@@ -230,13 +230,13 @@ class Ui_MainWindow(object):
 
     def checkIntMax(self, maxVal):
         if not maxVal:
-            return 1000
+            return 99999999
         else:
             return int(maxVal)
 
     def checkFloatMax(self, maxVal):
         if not maxVal:
-            return 1000
+            return 99999999
         else:
             return float(maxVal)
 
@@ -369,6 +369,7 @@ class Ui_MainWindow(object):
 
 
 def render():
+    __main__.selected_site35 = None
     visitor_explore_site = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(visitor_explore_site)

@@ -153,6 +153,12 @@ class Ui_MainWindow(object):
 
         self.staffRetrieved = list()
         self.showStaff()
+        self.user_name = __main__.logged_user
+
+        query = "select Name from site where Manager = \'" + self.user_name + "\';"
+        result = self.retrieve_from_db(query)
+
+        self.site_name = result[0][0]
 
         self.staffList.clicked.connect(self.selected_row)
         self.back.clicked.connect(lambda: self.func(idx=25))
@@ -160,17 +166,18 @@ class Ui_MainWindow(object):
         self.sdateEdit.dateChanged.connect(self.showStaff)
         self.edateEdit.dateChanged.connect(self.showStaff)
 
-        self.newName = None
-        self.newPrice = None
-        self.newCap = None
-        self.newMsr = None
-        self.newSDate = None
-        self.newEDate = None
-        self.newDes = None
-        self.newStaff = list()
+        self.new_name = None
+        self.new_price = None
+        self.new_cap = None
+        self.new_msr = None
+        self.new_start_date = None
+        self.new_end_date = None
+        self.new_des = None
+        self.new_staff = list()
 
     def showStaff(self):
 
+        self.staffList.clear()
         self.staffRetrieved.clear()
         staff = self.retrieveStaff()
 
@@ -181,40 +188,20 @@ class Ui_MainWindow(object):
 
 
     def retrieveStaff(self):
-        connection_object = __main__.connection_pool.get_connection()
-        if connection_object.is_connected():
-            db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ", db_Info)
-        else:
-            print("user_login.py login() Not Connected ")
-        cursor = connection_object.cursor()
-
-        query1 = "select distinct concat(user.Firstname, \' \', user.Lastname) " \
+        query1 = "select distinct concat(user.Firstname, \' \', user.Lastname, ' (', user.Username, ')') " \
                  "from user join staff on user.Username = staff.Username " \
                  "where staff.Username not in (select distinct Username from assign_to);"
 
-        print("query1: ", query1)
+        result1 = self.retrieve_from_db(query1)
 
-        cursor.execute(query1)
-        result1 = cursor.fetchall()
-
-        print("result1: ", result1)
-
-        query2 = "select distinct concat(user.Firstname,\' \',user.Lastname), " \
+        query2 = "select distinct concat(user.Firstname,\' \', user.Lastname, ' (', user.Username, ')'), " \
                  "assign_to.EventName, assign_to.StartDate, event.EndDate, assign_to.SiteName " \
                  "from user join assign_to join event " \
                  "on user.Username = assign_to.Username and assign_to.EventName = event.Name " \
                  "and assign_to.StartDate = event.StartDate and assign_to.SiteName = event.SiteName;"
 
         # result2[0] contains: staff name, event name, event sdate, event edate, event site name
-
-        print("query2: ", query2)
-
-        cursor.execute(query2)
-        result2 = cursor.fetchall()
-
-        print("result2: ", result2)
-
+        result2 = self.retrieve_from_db(query2)
         staffname = []
 
         for item in result1:
@@ -230,12 +217,6 @@ class Ui_MainWindow(object):
         staffname = list(staffname)
 
         print("staffname:", staffname)
-
-        if (connection_object.is_connected()):
-            cursor.close()
-            connection_object.close()
-            print("MySQL connection is closed")
-
         return staffname
 
     def convert_datetime_to_qdate(self, datetime_val):
@@ -255,58 +236,99 @@ class Ui_MainWindow(object):
         msg.exec_()
 
     def create(self):
-        # TODO: get all the info on the screen right now and create sql
         # site is the site linked to the manager
         # what if the manager does not have a site? --retrieve from site table
 
-        if self.nameEdit.text() == "" or self.priceEdit.text() == "" or self.capacityEdit.text() == "" \
-                or self.msrEdit.text() == "" or self.descriptionContent.toPlainText() == "":
+        self.new_name = self.nameEdit.text()
+        self.new_price = self.priceEdit.text()
+        self.new_cap = self.capacityEdit.text()
+        self.new_msr = self.msrEdit.text()
+        self.new_des = self.descriptionContent.toPlainText()
+        if self.new_name == "" or self.new_price == "" or self.new_cap == "" \
+                or self.new_msr == "" or self.new_des == "":
             self.msgDialog("All fields are required!")
             return
 
-        self.newName = self.nameEdit.text()
-        if float(self.priceEdit.text()) < 0:
-            self.newPrice = 0.0
+        if float(self.new_price) < 0:
+            self.new_price = 0.0
         else:
-            self.newPrice = float(self.priceEdit.text())
+            self.new_price = float(self.new_price)
 
-        self.newCap = self.capacityEdit.text()
-
-        if not self.is_number(self.newCap):
+        if not self.is_number(self.new_cap):
             self.msgDialog("Capacity needs to be a number!")
             return
 
-        self.newCap = float(self.newCap)
+        self.new_cap = float(self.new_cap)
 
-        if not self.newCap.is_integer():
+        if not self.new_cap.is_integer():
             self.msgDialog("Capacity needs to be an integer!")
             return
 
-        self.newCap = int(self.newCap)
+        self.new_cap = int(self.new_cap)
 
-        if self.newCap < 0:
+        if self.new_cap < 0:
             self.msgDialog("Capacity needs to be positive!")
             return
 
-        self.newMsr = int(self.msrEdit.text())
-        self.newSDate = self.sdateEdit.date().toString(Qt.ISODate)
-        self.newEDate = self.edateEdit.date().toString(Qt.ISODate)
+        self.new_msr = int(self.new_msr)
+        self.new_start_date = self.sdateEdit.date().toString(Qt.ISODate)
+        self.new_end_date = self.edateEdit.date().toString(Qt.ISODate)
 
         if self.sdateEdit.date() > self.edateEdit.date():
             self.msgDialog("Start date cannot be later than end date!")
             return
 
-        self.newDes = self.descriptionContent.toPlainText()
-
-        if self.newStaff is None:
+        if self.new_staff is None:
             self.msgDialog("Need to assign staff!")
             return
 
-        if (len(self.newStaff) < self.newMsr):
+        if len(self.new_staff) < self.new_msr:
             self.msgDialog("Number of staff assigned to this event cannot be fewer than the minimum requirement!")
             return
 
         # TODO: create!!! commit() to database
+
+        query1 = "select exists (select * from event " \
+                 "where Name = \'" + self.new_name + "\' " \
+                 "and StartDate = \'" + self.new_start_date + "\' " \
+                 "and SiteName = \'" + self.site_name + "\');"
+        result = self.retrieve_from_db(query1)
+        if int(result[0][0]) == 1:
+            self.msgDialog("You cannot create two same events!")
+            return
+
+        query = "select StartDate, EndDate from event " \
+                "where Name = \'" + self.new_name + "\' " \
+                "and SiteName = \'" + self.site_name + "\';"
+        result = self.retrieve_from_db(query)
+        if len(result) != 0:
+            for row in result:
+                start_date = self.convert_datetime_to_qdate(row[0])
+                end_date = self.convert_datetime_to_qdate(row[1])
+                if not (start_date > self.new_end_date or end_date < self.new_start_date):
+                    self.msgDialog("Events with the same name held on the same site cannot overlap!")
+                    return
+        query = "insert into event " \
+                "VALUES(\'" + self.new_name + "\', \'" + str(self.new_start_date) + "\', " \
+                "\'" + self.site_name + "\', \'" + str(self.new_end_date) + "\', " \
+                "\'" + str(self.new_price) + "\', \'" + str(self.new_cap) + "\', " \
+                "\'" + str(self.new_msr) + "\', \'" + self.new_des + "\');"
+        self.update_db(query)
+
+        # TODO: insert into assign_to
+        for staff in self.new_staff:
+            left = 0
+            right = len(staff)
+            for i in range(len(staff)):
+                if staff[i] == '(':
+                    left = i
+                if staff[i] == ')':
+                    right = i
+            user_name = staff[left+1:right]
+            query = "insert into assign_to " \
+                    "VALUES(\'" + user_name + "\', \'" + self.new_name + "\', " \
+                    "\'" + self.new_start_date + "\', \'" + self.site_name + "\');"
+            self.update_db(query)
 
     def is_number(self, s):
         try:
@@ -317,12 +339,42 @@ class Ui_MainWindow(object):
 
     def selected_row(self):
         selected_item = self.staffList.selectedItems()
-        self.newStaff.clear()
+        self.new_staff.clear()
         for item in selected_item:
-            self.newStaff.append(str(item.text()))
+            self.new_staff.append(str(item.text()))
 
-        print("new staff:", self.newStaff)
+        print("new staff:", self.new_staff)
 
+    def retrieve_from_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        return result
+
+    def update_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        connection_object.commit()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
 
     def func(self, idx):
         __main__.screen_number = idx

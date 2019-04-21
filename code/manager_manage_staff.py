@@ -133,6 +133,12 @@ class Ui_MainWindow(object):
         item = self.staffTable.horizontalHeaderItem(1)
         item.setText(_translate("MainWindow", "# Event Shifts"))
 
+        self.user_name = __main__.logged_user
+        query = "select Name from site where Manager = \'" + self.user_name + "\';"
+        result = self.retrieve_from_db(query)
+
+        self.site_name = result[0][0]
+
         if __main__.user_type == 'Manager':
             self.backBtn.clicked.connect(lambda: self.func(idx=10))
         elif __main__.user_type == "Manager_Visitor":
@@ -147,34 +153,10 @@ class Ui_MainWindow(object):
         self.filterBtn.clicked.connect(self.filter)
 
     def get_sites(self):
-        connection_object = __main__.connection_pool.get_connection()
-        if connection_object.is_connected():
-            db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ",db_Info)
-        else:
-            print("user_login.py login() Not Connected ")
-
-        query1 = "select distinct SiteName from assign_to"
-        cursor = connection_object.cursor()
-        cursor.execute(query1)
-        result = cursor.fetchall()
-        for row in result:
-            self.site_list.append(row[0])
-        print(self.site_list)
-        if (connection_object.is_connected()):
-            cursor.close()
-            connection_object.close()
-            print("MySQL connection is closed")
-
+        self.site_list.append(self.site_name)
 
     def filter(self):
         self.staffTable.setRowCount(0)  # clean the table first
-        connection_object = __main__.connection_pool.get_connection()
-        if connection_object.is_connected():
-            db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ", db_Info)
-        else:
-            print("user_login.py login() Not Connected ")
 
         current_site = self.siteBox.currentText()
         fname = self.fnameEdit.text()
@@ -193,17 +175,9 @@ class Ui_MainWindow(object):
                    "and user.Firstname like \'%" + fname + "%\' " \
                    "and user.Lastname like \'%" + lname + "%\' group by assign_to.Username;"
 
-        cursor = connection_object.cursor()
-        cursor.execute(query1)
-        result = cursor.fetchall()
+        result = self.retrieve_from_db(query1)
         for row in result:
             self.add_line(row)
-
-        if (connection_object.is_connected()):
-            cursor.close()
-            connection_object.close()
-            print("MySQL connection is closed")
-
 
     def add_line(self, row):
         name, event_shifts = row
@@ -211,6 +185,22 @@ class Ui_MainWindow(object):
         self.staffTable.setRowCount(row_count + 1)
         self.staffTable.setItem(row_count, 0, QTableWidgetItem(str(name)))
         self.staffTable.setItem(row_count, 1, QTableWidgetItem(str(event_shifts)))
+
+    def retrieve_from_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        return result
 
     def func(self, idx):
         __main__.screen_number = idx

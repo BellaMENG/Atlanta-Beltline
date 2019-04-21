@@ -194,12 +194,15 @@ class Ui_MainWindow(object):
         self.filterTable.clicked.connect(self.selected_rows)
         self.filterbtn.clicked.connect(self.filter)
 
-        if __main__.selected_date29 is not None:
-            self.dailyDetail.clicked.connect(lambda: self.func(idx=30))
-        else:
-            self.dailyDetail.clicked.connect(lambda: self.msgDialog(m="You didn't select any date!"))
+        self.dailyDetail.clicked.connect(self.daily_detail)
         self.site_name = "Inman Park"
         self.dates_list = list()
+
+    def daily_detail(self):
+        if __main__.selected_date29 is None:
+            self.msgDialog("You didn't select any date!")
+            return
+        self.func(idx=30)
 
     def checkIntMin(self, minVal):
         if not minVal:
@@ -215,13 +218,13 @@ class Ui_MainWindow(object):
 
     def checkIntMax(self, maxVal):
         if not maxVal:
-            return 1000
+            return 99999999
         else:
             return int(maxVal)
 
     def checkFloatMax(self, maxVal):
         if not maxVal:
-            return 1000
+            return 99999999
         else:
             return float(maxVal)
 
@@ -453,6 +456,8 @@ class Ui_MainWindow(object):
 
 
 def render():
+    __main__.selected_date29 = None
+    __main__.site_name29 = None
     manager_site_report = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(manager_site_report)

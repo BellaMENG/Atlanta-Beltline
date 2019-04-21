@@ -92,6 +92,7 @@ def render():
     staff_functionality.close()
 
 
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

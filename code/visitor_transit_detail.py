@@ -10,6 +10,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import __main__
 from PyQt5.QtWidgets import QTableWidgetItem, QMessageBox
+from PyQt5.QtCore import Qt
+
 app = QtWidgets.QApplication(sys.argv)
 
 
@@ -124,7 +126,12 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "# Connected Sites"))
         self.backbtn.setText(_translate("MainWindow", "Back"))
 
+        self.selected = None
         self.retrieve_info()
+        self.transitTable.clicked.connect(self.selected_rows)
+        if __main__.logged_user is None:
+            __main__.logged_user = 'visitor1'
+        self.user_name = __main__.logged_user
 
         self.backbtn.clicked.connect(lambda: self.func(idx=35))
         self.logTransit.clicked.connect(self.log_transit)
@@ -178,9 +185,63 @@ class Ui_MainWindow(object):
             print("MySQL connection is closed")
         return result
 
+    def update_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        connection_object.commit()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+
     def log_transit(self):
         # TODO: log transit into the db
-        return
+        if self.selected is None:
+            self.msgDialog("You must select a transit before logging the transit!")
+            return
+        route, trans_type = self.selected
+        transit_date = self.dateEdit.date().toString(Qt.ISODate)
+        user_name = self.user_name
+
+        query = "select TransitDate from take " \
+                "where Route = \'" + route + "\' " \
+                "and TransportType = \'" + trans_type + "\' " \
+                "and Username = \'" + user_name + "\';"
+        result = self.retrieve_from_db(query)
+        transit_dates = list()
+        if len(result) != 0:
+            for row in result:
+                transit_dates.append(str(row[0]))
+            if transit_date in transit_dates:
+                self.msgDialog("You can only take the same transit once a day!")
+                return
+
+        query = "insert into take " \
+                "VALUES(\'" + user_name + "\', \'" + trans_type + "\', " \
+                "\'" + route + "\', \'" + transit_date + "\');"
+        print(query)
+        self.update_db(query)
+
+    def selected_rows(self):
+        # TODO: handle selected rows and put it in global var
+        rowPos = self.transitTable.currentRow()
+        self.selected = [self.transitTable.item(rowPos, 0).text(), self.transitTable.item(rowPos, 1).text()]
+
+    def msgDialog(self, m):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Sorry!")
+        msg.setInformativeText("This action is not allowed.")
+        msg.setWindowTitle("Not allowed")
+        msg.setDetailedText(m)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def func(self, idx):
         __main__.screen_number = idx

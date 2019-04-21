@@ -158,6 +158,9 @@ class Ui_MainWindow(object):
         self.backbtn.setText(_translate("MainWindow", "Back"))
 
         self.retrieve_info()
+        if __main__.logged_user is None:
+            __main__.logged_user = 'visitor1'
+        self.user_name = __main__.logged_user
 
         self.backbtn.clicked.connect(lambda: self.func(idx=33))
         self.logVisit.clicked.connect(self.log_visit)
@@ -204,7 +207,23 @@ class Ui_MainWindow(object):
             print("MySQL connection is closed")
         return result
 
+    def update_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        connection_object.commit()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+
     def log_visit(self):
+        name, start_date, site_name, tickets_re = __main__.selected_event33
         # check the status of the create statement
         start_date = self.sdateEdit.date()
         end_date = self.edateEdit.date()
@@ -214,6 +233,27 @@ class Ui_MainWindow(object):
             return
         # TODO: log the visit to db!
         visit_date = visit_date.toString(Qt.ISODate)
+        start_date = start_date.toString(Qt.ISODate)
+        end_date = end_date.toString(Qt.ISODate)
+
+        query = "select EndDate from visit_event " \
+                "where Name = \'" + name + "\' " \
+                "and StartDate = \'" + str(start_date) + "\' " \
+                "and SiteName = \'" + site_name + "\' " \
+                "and Username = \'" + self.user_name + "\';"
+        result = self.retrieve_from_db(query)
+        visit_dates = list()
+        if len(result) != 0:
+            for row in result:
+                visit_dates.append(str(row[0]))
+        if visit_date in visit_dates:
+            self.msgDialog("You cannot log visit to the same event on the same date!")
+            return
+        query = "insert into visit_event " \
+                "VALUES(\'" + self.user_name + "\', \'" + name + "\', " \
+                "\'" + str(start_date) + "\', \'" + site_name + "\', " \
+                "\'" + str(visit_date) + "\');"
+        self.update_db(query)
 
     def msgDialog(self, m):
         msg = QMessageBox()

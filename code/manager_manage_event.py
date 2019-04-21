@@ -256,6 +256,11 @@ class Ui_MainWindow(object):
         self.filterResultTable.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
         self.filterResultTable.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
 
+        self.user_name = __main__.logged_user
+        query = "select Name from site where Manager = \'" + self.user_name + "\';"
+        self.result = self.retrieve_from_db(query)
+        self.site_name = self.result[0][0]
+
         self.filterButton.clicked.connect(self.filter)
         self.createButton.clicked.connect(lambda: self.func(idx=27))
         self.viewOrEditButton.clicked.connect(self.viewOrEdit)
@@ -266,6 +271,7 @@ class Ui_MainWindow(object):
         else:
             self.backButton.clicked.connect(lambda: self.func(idx=10))
         self.filterResultTable.clicked.connect(self.selected_row)
+        self.deleteButton.clicked.connect(self.delete)
 
         self.eventSDate = list()
         self.eventSiteName = list()
@@ -284,13 +290,13 @@ class Ui_MainWindow(object):
 
     def checkIntMax(self, maxVal):
         if not maxVal:
-            return 1000
+            return 99999999
         else:
             return int(maxVal)
 
     def checkFloatMax(self, maxVal):
         if not maxVal:
-            return 1000
+            return 99999999
         else:
             return float(maxVal)
 
@@ -302,81 +308,39 @@ class Ui_MainWindow(object):
         sdate = self.sdateEdit.date().toString(Qt.ISODate)
         edate = self.edateEdit.date().toString(Qt.ISODate)
 
-        min_duration = self.drStart.text()
-        max_duration = self.drEnd.text()
-        min_tvr = self.tvrStart.text()  # tvr: total visits range
-        max_tvr = self.tvrEnd.text()
-        min_trr = self.trrStart.text()  # trr: total revenue range
-        max_trr = self.trrEnd.text()
+        query1 = "select Name, StartDate, SiteName, datediff(EndDate, StartDate) + 1, Price " \
+                 "from event where Name like \'%" + event_name + "%\' " \
+                 "and Description like \'%" + keyword + "%\' " \
+                 "and StartDate >= \'" + sdate + "\' " \
+                 "and EndDate <= \'" + edate + "\' and SiteName = \'" + self.site_name + "\';"
 
-        min_duration = self.checkIntMin(min_duration)
-        max_duration = self.checkIntMax(max_duration)
-        min_tvr = self.checkIntMin(min_tvr)
-        max_tvr = self.checkIntMax(max_tvr)
-        min_trr = self.checkFloatMin(min_trr)
-        max_trr = self.checkFloatMax(max_trr)
-
-        connection_object = __main__.connection_pool.get_connection()
-        if connection_object.is_connected():
-            db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ", db_Info)
-        else:
-            print("user_login.py login() Not Connected ")
-        cursor = connection_object.cursor()
-
-        query1 = "select event.Name as \'Name\',count(assign_to.Username) as \'Staff Count\'," \
-                 "datediff(Event.EndDate, Event.StartDate) + 1 as \'Duration (days)\'," \
-                 "count(visit_event.Name) as \'Total Visits\'," \
-                 "event.Price*count(visit_event.Name) as \'Total Revenue\', " \
-                 "event.StartDate,event.SiteName " \
-                 "from assign_to join event join visit_event on event.Name = assign_to.EventName " \
-                 "and assign_to.StartDate = event.StartDate " \
-                 "and assign_to.SiteName = event.SiteName " \
-                 "and event.Name = visit_event.Name " \
-                 "and event.StartDate = visit_event.StartDate " \
-                 "and event.SiteName = visit_event.SiteName " \
-                 "where event.Name like \'%" \
-                 + event_name \
-                 + "%\' and event.Description like \'%" \
-                 + keyword \
-                 + "%\' and event.StartDate >= \'" \
-                 + sdate \
-                 + "\' and event.EndDate <= \'" \
-                 + edate \
-                 + "\' and datediff(event.EndDate, event.StartDate) + 1 between " + str(min_duration) + " and " \
-                 + str(max_duration) \
-                 + " and event.Name in (select Name from visit_event group by Name having count(*) > " \
-                 + str(min_tvr) \
-                 + " and count(*) < " \
-                 + str(max_tvr) \
-                 + ")group by event.Name, event.SiteName, event.StartDate;"
-
-        print("query 1: ", query1)
-        cursor.execute(query1)
-        result = cursor.fetchall()
-
-        if result is None:
-            return
-        print("result: ", result)
-
+        result = self.retrieve_from_db(query1)
         for row in result:
-            revenue = float(row[4])
-            if min_trr < revenue < max_trr:
-                self.add_line(row)
-                self.eventSDate.append(row[5])
-                self.eventSiteName.append(row[6])
-
-        if (connection_object.is_connected()):
-            cursor.close()
-            connection_object.close()
-            print("MySQL connection is closed")
+            name, start_date, site_name, duration, price = row
+            query = "select count(UserName) from assign_to join event " \
+                    "on assign_to.EventName = event.Name and assign_to.StartDate = event.StartDate " \
+                    "and assign_to.SiteName = event.SiteName " \
+                    "where event.Name = \'" + name + "\' " \
+                    "and event.StartDate = \'" + str(start_date) + "\' " \
+                    "and event.SiteName = \'" + site_name + "\' " \
+                    "group by event.Name, event.StartDate, event.SiteName;"
+            result = self.retrieve_from_db(query)
+            if len(result) == 0:
+                staff_count = 0
+            else:
+                staff_count = result[0][0]
+            query = "select count(*) from visit_event " \
+                    "where Name = \'" + name + "\' " \
+                    "and StartDate = \'" + str(start_date) + "\' " \
+                    "and SiteName = \'" + site_name + "\';"
+            result = self.retrieve_from_db(query)
+            total_visits = result[0][0]
+            total_rev = int(total_visits) * float(price)
+            single_row = [name, staff_count, duration, total_visits, total_rev, start_date, site_name]
+            self.add_line(single_row)
 
     def selected_row(self):
         rowPos = self.filterResultTable.currentRow()
-        print("current row number:", rowPos)
-        print("current row name:", self.filterResultTable.item(rowPos, 0).text())
-        print("current row sdate:", self.filterResultTable.item(rowPos, 5).text())
-        print("current row siteName:", self.filterResultTable.item(rowPos, 6).text())
         # event.Name, event.StartDate, event.SiteName
         __main__.selected_event25 = [self.filterResultTable.item(rowPos, 0).text(),
                                      self.filterResultTable.item(rowPos, 5).text(),
@@ -384,24 +348,35 @@ class Ui_MainWindow(object):
         print("selected_event:", __main__.selected_event25)
 
     def add_line(self, row):
-        name, staffCount, duration, totalVisits, tr, sDate, siteName = row
+        min_duration = self.checkIntMin(self.drStart.text())
+        max_duration = self.checkIntMax(self.drEnd.text())
+        min_tvr = self.checkIntMin(self.tvrStart.text())
+        max_tvr = self.checkIntMax(self.tvrEnd.text())
+        min_trr = self.checkFloatMin(self.trrStart.text())
+        max_trr = self.checkFloatMax(self.trrEnd.text())
+
+        name, staff_count, duration, total_visits, tr, start_date, site_name = row
+        if (not min_duration <= duration <= max_duration) \
+                or (not min_tvr <= total_visits <= max_tvr) \
+                or (not min_trr <= tr <= max_trr):
+            return
+
         tr = float(tr)
         row_count = self.filterResultTable.rowCount()
         self.filterResultTable.setRowCount(row_count + 1)
         self.filterResultTable.setItem(row_count, 0, QTableWidgetItem(name))
-        self.filterResultTable.setItem(row_count, 1, QTableWidgetItem(str(staffCount)))
+        self.filterResultTable.setItem(row_count, 1, QTableWidgetItem(str(staff_count)))
         self.filterResultTable.setItem(row_count, 2, QTableWidgetItem(str(duration)))
-        self.filterResultTable.setItem(row_count, 3, QTableWidgetItem(str(totalVisits)))
+        self.filterResultTable.setItem(row_count, 3, QTableWidgetItem(str(total_visits)))
         self.filterResultTable.setItem(row_count, 4, QTableWidgetItem(str(tr)))
-        self.filterResultTable.setItem(row_count, 5, QTableWidgetItem(sDate.strftime('%Y-%m-%d')))
-        self.filterResultTable.setItem(row_count, 6, QTableWidgetItem(str(siteName)))
+        self.filterResultTable.setItem(row_count, 5, QTableWidgetItem(start_date.strftime('%Y-%m-%d')))
+        self.filterResultTable.setItem(row_count, 6, QTableWidgetItem(str(site_name)))
 
     def create(self):
         self.func(27)
         app.exit()
 
-    # TODO: delete function !
-    def delete(self, row):
+    def delete(self):
         if __main__.selected_event25 is None:
             self.msgDialog("Nothing selected!")
             return
@@ -412,13 +387,29 @@ class Ui_MainWindow(object):
                 "where Name = \'" + name + "\' " \
                 "and StartDate = \'" + start_date + "\' and SiteName = \'" + site_name + "\';"
         print(query)
-        result = self.retrieve_from_db(query)
+        self.update_db(query)
+        self.filter()
 
     def viewOrEdit(self):
         if __main__.selected_event25 is None:
             self.msgDialog("Nothing selected!")
             return
         self.func(26)
+
+    def update_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        connection_object.commit()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
 
     def retrieve_from_db(self, query):
         connection_object = __main__.connection_pool.get_connection()
@@ -451,6 +442,7 @@ class Ui_MainWindow(object):
         app.exit()
 
 def render():
+    __main__.selected_event25 = None
     manager_manage_event = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(manager_manage_event)

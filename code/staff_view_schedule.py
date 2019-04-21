@@ -233,6 +233,7 @@ class Ui_MainWindow(object):
         msg.exec_()
 
 def render():
+    __main__.selected_event31 = None
     staff_view_schedule = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(staff_view_schedule)
