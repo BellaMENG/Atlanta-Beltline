@@ -18,31 +18,15 @@ def isValidEmail(email):
 
 def isValidPhone(phone):
     nums = ['0','1','2','3','4','5','6','7','8','9']
-    parts = phone.split('-')
-    if len(parts) != 3:
-        return False
 
-    if len(parts[0]) == 3:
-        for s in parts[0]:
-            if s not in nums:
-                return False
-    else:
-        return False
-
-    if len(parts[1]) == 3:
-        for s in parts[1]:
-            if s not in nums:
-                return False
-    else:
-        return False
-
-    if len(parts[2]) == 4:
-        for s in parts[2]:
+    if len(phone) == 10:
+        for s in phone:
             if s not in nums:
                 return False
         return True
     else:
         return False
+
 
 def isValidZipcode(zipcode):
     nums = ['0','1','2','3','4','5','6','7','8','9']

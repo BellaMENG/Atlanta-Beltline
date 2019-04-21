@@ -6,6 +6,7 @@ from mysql.connector import pooling
 user_type = None
 screen_number = None
 logged_user = None
+Quit = False
 selected_event25 = None
 selected_date29 = None
 site_name29 = None
@@ -26,8 +27,8 @@ if __name__ == "__main__":
                                                                    pool_size = 5,
                                                                    pool_reset_session = True,
                                                                    host = 'localhost',
-                                                                   database = 'Beltline',
-                                                                   user = 'bella',
+                                                                   database = 'beltline_version2',
+                                                                   user = 'root',
                                                                    password = '',
                                                                    use_pure = True)
     connection_object = connection_pool.get_connection()
@@ -39,14 +40,15 @@ if __name__ == "__main__":
 
     # user_take_transit.render()
     # user_transit_history.render()
-    manager_manage_event.render()
+    #manager_manage_event.render()
     # manager_view_or_edit_event.render()
     # user_login.render()
     # staff_functionality_v.render()
 #    logged_user = 'cluah'
 #    user_transit_history.render()
 
-    while True:
+    user_login.render()
+    while not Quit:
         if screen_number == 1:
             user_login.render()
         elif screen_number == 2:

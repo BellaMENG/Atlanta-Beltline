@@ -221,9 +221,9 @@ class Ui_employee_manage_profile(object):
         for i in range(len(result)):
             self.add_email_input()
             self.lineEdits[i].setText(result[i][0])
-        sql = "delete from emails where Username = \'" + self.user_name + "\';"
-        cursor.execute(sql)
-        connection_object.commit()
+        # sql = "delete from emails where Username = \'" + self.user_name + "\';"
+        # cursor.execute(sql)
+        # connection_object.commit()
         if(connection_object.is_connected()):
                 cursor.close()
                 connection_object.close()
@@ -237,7 +237,7 @@ class Ui_employee_manage_profile(object):
         else:
             print("user_login.py login() Not Connected ")
         cursor = connection_object.cursor()
-        sql = "select Email from emails where Email = \'" + email+ "\';"
+        sql = "select Email from emails where Email = \'" + email+ "\' and Username != \'"+self.user_name +"\';"
         cursor.execute(sql)
         result = cursor.fetchall()
         if(connection_object.is_connected()):
@@ -413,8 +413,8 @@ class Ui_employee_manage_profile(object):
         app.exit()
     
     def back_func(self):
-        if not self.stored:
-            self.store_emails()
+        # if not self.stored:
+        #     self.store_emails()
         if __main__.user_type == "Manager":
             self.func(10)
         elif __main__.user_type == "Manager_Visitor":
