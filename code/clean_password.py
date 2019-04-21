@@ -9,7 +9,7 @@ if __name__ == "__main__":
                                                                    pool_reset_session = True,
                                                                    host = 'localhost',
                                                                    database = 'beltline_version2',
-                                                                   user = 'root',
+                                                                   user = 'bella',
                                                                    password = '',
                                                                    use_pure = True)
     connection_object = connection_pool.get_connection()
@@ -34,7 +34,7 @@ result = cursor.fetchall()
 for row in result:
     user_name,pwd = row
     pwd = hash_password(pwd)
-    sql = "update user set Password = pwd where Username = user_name;"
+    sql = "update user set Password = \'" + pwd + "\' where Username = \'" + user_name + "\';"
     cursor.execute(sql)
 connection_object.commit()
 if(connection_object.is_connected()):
