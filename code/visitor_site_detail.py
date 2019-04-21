@@ -9,6 +9,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import __main__
+from PyQt5.QtWidgets import QTableWidgetItem, QMessageBox
+from PyQt5.QtCore import Qt
+
 app = QtWidgets.QApplication(sys.argv)
 
 
@@ -109,6 +112,10 @@ class Ui_MainWindow(object):
         self.log_visitbtn.setText(_translate("MainWindow", "Log Visit"))
         self.backbtn.setText(_translate("MainWindow", "Back"))
 
+        if __main__.logged_user is None:
+            __main__.logged_user = 'visitor1'
+        self.user_name = __main__.logged_user
+
         self.retrieve_info()
         self.backbtn.clicked.connect(lambda: self.func(idx=35))
         self.log_visitbtn.clicked.connect(self.log_visit)
@@ -126,7 +133,25 @@ class Ui_MainWindow(object):
 
     def log_visit(self):
         # TODO: insert into db
-        return
+        site_name = __main__.selected_site35
+        user_name = __main__.logged_user
+        visit_date = self.dateEdit.date().toString(Qt.ISODate)
+        query = "select VisitSiteDate from visit_site " \
+                "where Username = \'" + user_name + "\' " \
+                "and Name = \'" + site_name + "\';"
+        result = self.retrieve_from_db(query)
+        date_list = list()
+        if len(result) != 0:
+            for row in result:
+                date_list.append(str(row[0]))
+            if visit_date in date_list:
+                self.msgDialog("You can visit the same site once a day!")
+                return
+
+        query = "insert into visit_site " \
+                "VALUES(\'" + user_name + "\', " \
+                "\'" + site_name + "\', \'" + visit_date + "\');"
+        self.update_db(query)
 
     def retrieve_from_db(self, query):
         connection_object = __main__.connection_pool.get_connection()
@@ -143,6 +168,31 @@ class Ui_MainWindow(object):
             connection_object.close()
             print("MySQL connection is closed")
         return result
+
+    def update_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        connection_object.commit()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+
+    def msgDialog(self, m):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Sorry!")
+        msg.setInformativeText("This action is not allowed.")
+        msg.setWindowTitle("Not allowed")
+        msg.setDetailedText(m)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def func(self, idx):
         __main__.screen_number = idx

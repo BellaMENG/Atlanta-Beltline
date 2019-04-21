@@ -267,26 +267,18 @@ class Ui_MainWindow(object):
 
     def checkIntMax(self, maxVal):
         if not maxVal:
-            return 1000
+            return 99999999
         else:
             return int(maxVal)
 
     def checkFloatMax(self, maxVal):
         if not maxVal:
-            return 1000
+            return 99999999
         else:
             return float(maxVal)
 
     def fillTable(self):
         eventName, eventSDate, eventSiteName = __main__.selected_event25
-        connection_object = __main__.connection_pool.get_connection()
-        if connection_object.is_connected():
-            db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ", db_Info)
-        else:
-            print("user_login.py login() Not Connected ")
-        cursor = connection_object.cursor()
-
         query1 = "select visit_event.EndDate as \'Date\', " \
                  "count(visit_event.EndDate) as \'Daily Visits\', " \
                  "count(visit_event.EndDate)*Event.Price as \'Daily Revenue\' " \
@@ -298,33 +290,11 @@ class Ui_MainWindow(object):
                  + "\' and event.SiteName = \'" + eventSiteName \
                  + "\' "\
                  "group by event.Name, event.SiteName, event.StartDate, visit_event.EndDate "
-
-        print("query: ", query1)
-
-        cursor.execute(query1)
-        result = cursor.fetchall()
-
-        if result is None:
-            return
-        print("result: ", result)
-
-        if (connection_object.is_connected()):
-            cursor.close()
-            connection_object.close()
-            print("MySQL connection is closed")
-
+        result = self.retrieve_from_db(query1)
         return result
 
     def retrieveEvent(self):
         eventName, eventSDate, eventSiteName = __main__.selected_event25
-        connection_object = __main__.connection_pool.get_connection()
-        if connection_object.is_connected():
-            db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ", db_Info)
-        else:
-            print("user_login.py login() Not Connected ")
-        cursor = connection_object.cursor()
-
         query1 = "select event.Name, event.Price, event.StartDate, event.EndDate, event.MinStaffReq," \
                  "event.Capacity, event.Description " \
                  "from event " \
@@ -335,58 +305,22 @@ class Ui_MainWindow(object):
                  + "\' and event.SiteName = \'" \
                  + eventSiteName + "\'"
 
-        print("query: ", query1)
-
-        cursor.execute(query1)
-        result = cursor.fetchall()
-
-        if result is None:
-            return
-        print("result: ", result)
-
-        if (connection_object.is_connected()):
-            cursor.close()
-            connection_object.close()
-            print("MySQL connection is closed")
-
+        result = self.retrieve_from_db(query1)
         return result
 
     def retrieveStaff(self):
         eventName, eventSDate, eventSiteName = __main__.selected_event25
-        connection_object = __main__.connection_pool.get_connection()
-        if connection_object.is_connected():
-            db_Info = connection_object.get_server_info()
-            print("user_login.py login() Connected to MySQL server: ", db_Info)
-        else:
-            print("user_login.py login() Not Connected ")
-        cursor = connection_object.cursor()
-
-        query1 = "select concat(Firstname, \' \', Lastname) as \'Staff\'" \
+        query1 = "select concat(Firstname, \' \', Lastname, \' (\', user.Username, \')\') as \'Staff\'" \
                  "from user join assign_to " \
                  "on user.Username = assign_to.Username " \
                  "where assign_to.EventName = \'" + eventName \
                  + "\' and assign_to.StartDate = \'" + eventSDate \
                  + "\' and assign_to.SiteName = \'" + eventSiteName + "\'"
 
-        print("query: ", query1)
-
-        cursor.execute(query1)
-        result = cursor.fetchall()
-
-        if result is None:
-            return
-        print("result: ", result)
-
-        if (connection_object.is_connected()):
-            cursor.close()
-            connection_object.close()
-            print("MySQL connection is closed")
-
+        result = self.retrieve_from_db(query1)
         return result
 
     def selected_rows(self):
-        # store information in global var
-
         selected_item = self.staffAssignedEdit.selectedItems()
         self.newStaff.clear()
         for item in selected_item:
@@ -395,6 +329,7 @@ class Ui_MainWindow(object):
         print(self.newStaff)
 
     def update(self):
+        event_name, start_date, site_name = __main__.selected_event25
         if len(self.newStaff) < int(self.MSR):
             self.msgDialog("The number of staff assigned need "
                            "to be more than minimum staff requirement for this event.")
@@ -403,7 +338,31 @@ class Ui_MainWindow(object):
         new_description = self.descriptionEdit.toPlainText()
         print(new_description)
         # TODO: commit the change to database
+        query = "DELETE FROM assign_to " \
+                "where EventName = \'" + event_name + "\' " \
+                "and StartDate = \'" + start_date + "\' " \
+                "and SiteName = \'" + site_name + "\';"
+        self.update_db(query)
+        for staff in self.newStaff:
+            left = 0
+            right = len(staff)
+            for i in range(len(staff)):
+                if staff[i] == '(':
+                    left = i
+                if staff[i] == ')':
+                    right = i
+            user_name = staff[left+1:right]
+            print(user_name)
+            query = "insert into assign_to " \
+                    "VALUES(\'" + user_name + "\',\'" + event_name + "\'," \
+                    "\'" + str(start_date) + "\',\'" + site_name + "\');"
+            self.update_db(query)
 
+        query = "update event set Description = \"" + new_description + "\" " \
+                "where Name = \'" + event_name + "\' " \
+                "and StartDate = \'" + start_date + "\' " \
+                "and SiteName = \'" + site_name + "\';"
+        self.update_db(query)
 
     def filter(self):
         self.filterTable.setRowCount(0)  # clean the table first
@@ -432,6 +391,37 @@ class Ui_MainWindow(object):
         self.filterTable.setItem(row_count, 0, QTableWidgetItem(date.strftime('%Y-%m-%d')))
         self.filterTable.setItem(row_count, 1, QTableWidgetItem(str(daily_visits)))
         self.filterTable.setItem(row_count, 2, QTableWidgetItem(str(daily_revenue)))
+
+    def update_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        connection_object.commit()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+
+    def retrieve_from_db(self, query):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ", db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if (connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        return result
 
     def msgDialog(self, m):
         msg = QMessageBox()

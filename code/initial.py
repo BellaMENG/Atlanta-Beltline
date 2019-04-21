@@ -13,6 +13,11 @@ site_name29 = None
 selected_event31 = None
 selected_event33 = None
 selected_site35 = None
+Quit = False
+argv1 = None
+argv2 = None
+argv3 = None
+
 # event: event.Name, event.StartDate, event.SiteName
 
 import user_login,register_navigation,register_user,register_visitor,register_employee,register_employee_v
@@ -21,7 +26,9 @@ import user_take_transit,user_transit_history, employee_manage_profile
 import manager_manage_event, manager_view_or_edit_event, manager_create_event, manager_manage_staff
 import manager_site_report, manager_daily_detail, staff_view_schedule, staff_event_detail
 import visitor_explore_event, visitor_event_detail, visitor_explore_site
-import visitor_transit_detail, visitor_site_detail, visitor_visit_history
+import visitor_transit_detail, visitor_site_detail, visitor_visit_history, administrator_manage_user
+import administrator_manage_site, administrator_edit_site, administrator_create_site, administrator_manage_transit
+import administrator_edit_transit, administrator_create_transit
 if __name__ == "__main__":
     connection_pool = pooling.MySQLConnectionPool( pool_name = "beltline_pool",
                                                                    pool_size = 5,
@@ -38,18 +45,10 @@ if __name__ == "__main__":
     else:
         print("Database not connected")
 
-    # user_take_transit.render()
-    # user_transit_history.render()
-    #manager_manage_event.render()
-    # manager_view_or_edit_event.render()
-    # user_login.render()
-    # staff_functionality_v.render()
-#    logged_user = 'cluah'
-#    user_transit_history.render()
 
     user_login.render()
+
     while not Quit:
-        print("loop running ",screen_number)
         if screen_number == 1:
             user_login.render()
             print("screen number after user_login:",screen_number)
@@ -147,7 +146,7 @@ if __name__ == "__main__":
         elif screen_number == 24:
             administrator_create_transit.render()
             print("screen number after administrator_create_transit:",screen_number)
-        
+
         elif screen_number == 25:
             manager_manage_event.render()
             print("screen number after manager_manage_event:",screen_number)
@@ -203,3 +202,8 @@ if __name__ == "__main__":
         elif screen_number == 38:
             visitor_visit_history.render()
             print("screen number after visitor_visit_history:",screen_number)
+
+    if (connection_object.is_connected()):
+        connection_object.close()
+        print("MySQL connection is closed")
+
