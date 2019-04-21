@@ -164,6 +164,7 @@ class Ui_MainWindow(object):
         self.filterbtn.clicked.connect(self.filter)
 
     def filter(self):
+        self.historyTable.setRowCount(0)
         event_name = self.event_content.text()
         site_name = self.site_content.currentText()
         if site_name == '--ALL--':

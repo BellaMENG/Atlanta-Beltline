@@ -122,10 +122,12 @@ class Ui_manager_functionality_v(object):
         self.view_staff_btn.clicked.connect(self.view_staff)
         self.explore_site_btn.clicked.connect(lambda:self.func(35))
         self.take_transit_btn.clicked.connect(lambda:self.func(15))
-        self.view_visit_history_btn.clicked.connect(lambda:self.func(16))
+        self.view_visit_history_btn.clicked.connect(lambda:self.func(38))
         self.manag_event_btn.clicked.connect(self.manage_event)
         self.view_stie_report_btn.clicked.connect(self.view_site_report)
         self.explore_event_btn.clicked.connect(lambda:self.func(33))
+        self.back_btn.clicked.connect(lambda: self.func(idx=1))
+        self.view_transit_history_btn.clicked.connect(lambda: self.func(idx=16))
 
     def manage_event(self):
         if len(self.result) == 0:
