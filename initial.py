@@ -37,12 +37,12 @@ if __name__ == "__main__":
                                                                    user = 'bella',
                                                                    password = '',
                                                                    use_pure = True)
-    connection_object = connection_pool.get_connection()
-    if connection_object.is_connected():
-        info = connection_object.get_server_info()
-        print("Connected to MySQL server: ",info)
-    else:
-        print("Database not connected")
+    # connection_object = connection_pool.get_connection()
+    # if connection_object.is_connected():
+    #     info = connection_object.get_server_info()
+    #     print("Connected to MySQL server: ",info)
+    # else:
+    #     print("Database not connected")
 
     user_login.render()
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         elif screen_number == 38:
             visitor_visit_history.render()
 
-    if (connection_object.is_connected()):
-        connection_object.close()
-        print("MySQL connection is closed")
+    # if (connection_object.is_connected()):
+    #     connection_object.close()
+    #     print("MySQL connection is closed")
 
