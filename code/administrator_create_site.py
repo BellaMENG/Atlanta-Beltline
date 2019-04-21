@@ -131,7 +131,7 @@ class Ui_administrator_create_site(object):
 
 
     def get_managers(self):
-        query1 = "select concat(Firstname, \' \',Lastname) from user where UserType = \'manager\'"; 
+        query1 = "select concat(Firstname, \' \',Lastname),Username from user where Username in ( select Username from manager where Username not in (select Username from assign_to) );" 
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()

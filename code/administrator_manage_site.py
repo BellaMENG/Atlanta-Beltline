@@ -170,6 +170,7 @@ class Ui_adniministrator_manage_site(object):
         self.delete_btn.clicked.connect(self.delete_site)
         self.edit_btn.clicked.connect(self.edit_site)
         self.back_btn.clicked.connect(self.back)
+        self.create_btn.clicked.connect(lambda:self.func(idx=21))
         #self.create_btn.clicked.connect(self.add_line)
 
     def filter(self):
@@ -182,7 +183,7 @@ class Ui_adniministrator_manage_site(object):
         order_col = self.sortbyComboBox.currentText()
         if order_col == "manager.Name":
             order_col = "concat(user.Firstname,\' \',user.Lastname)"
-        sql = "select site.Name , concat(user.Firstname,\' \',user.Lastname), site.OpenEveryDay from user join site on user.Username = site.Manager where site.Name like concat(\'%\',\'" + site + "\' ,\'%\') and concat(user.Firstname,\' \',user.Lastname) like concat(\'%\',\'" + manager+ "\' ,\'%\') and site.OpenEveryDay like concat(\'%\',\'"+open_everyday+"\' ,\'%\') order by \'" + order_col + "\' \'" + order + "\';"
+        sql = "select site.Name , concat(user.Firstname,\' \',user.Lastname), site.OpenEveryDay from user join site on user.Username = site.Manager where site.Name like concat(\'%\',\'" + site + "\' ,\'%\') and concat(user.Firstname,\' \',user.Lastname) like concat(\'%\',\'" + manager+ "\' ,\'%\') and site.OpenEveryDay like concat(\'%\',\'"+open_everyday+"\' ,\'%\') order by " + order_col + " " + order + ";"
         print(sql)
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():

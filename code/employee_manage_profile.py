@@ -279,8 +279,7 @@ class Ui_employee_manage_profile(object):
             else:
                 if isValidEmail(email) or not self.email_exist(email):
                     email_count += 1
-                    if not self.myemail_exist(email):
-                        email_list.append(email)
+                    email_list.append(email)
                 else:
                     QMessageBox.warning(self.label, 
                                     "Invalid Information", 
@@ -300,7 +299,11 @@ class Ui_employee_manage_profile(object):
             print("user_login.py login() Connected to MySQL server: ",db_Info)
         else:
             print("user_login.py login() Not Connected ")
+        
         cursor = connection_object.cursor()
+        sql = "delete from emails where Username = \'" + self.user_name + "\';"
+        cursor.execute(sql)
+        connection_object.commit()
         for e in email_list:
             sql = "insert into emails values (\'" + self.user_name + "\', \'" + e + "\');"
             cursor.execute(sql)
