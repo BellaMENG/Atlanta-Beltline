@@ -188,13 +188,15 @@ class Ui_MainWindow(object):
 
 
     def retrieveStaff(self):
+
         query1 = "select distinct concat(user.Firstname, \' \', user.Lastname, ' (', user.Username, ')') " \
                  "from user join staff on user.Username = staff.Username " \
                  "where staff.Username not in (select distinct Username from assign_to);"
 
         result1 = self.retrieve_from_db(query1)
-
+        
         query2 = "select distinct concat(user.Firstname,\' \', user.Lastname, ' (', user.Username, ')'), " \
+
                  "assign_to.EventName, assign_to.StartDate, event.EndDate, assign_to.SiteName " \
                  "from user join assign_to join event " \
                  "on user.Username = assign_to.Username and assign_to.EventName = event.Name " \
@@ -281,6 +283,7 @@ class Ui_MainWindow(object):
         if self.new_staff is None:
             self.msgDialog("Need to assign staff!")
             return
+
 
         if len(self.new_staff) < self.new_msr:
             self.msgDialog("Number of staff assigned to this event cannot be fewer than the minimum requirement!")
