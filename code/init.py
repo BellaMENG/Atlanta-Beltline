@@ -44,20 +44,10 @@ if __name__ == "__main__":
     else:
         print("Database not connected")
 
-    #user_login.render()
-    # logged_user = 'manager2'
-    # administrator_create_transit.render()
-    # print("screen number after test page:",screen_number)
-
     user_login.render()
     print("screen number after user_login:",screen_number)
     print("user type after user_login:",user_type)
     print("user name after user_login",logged_user)
-
-    # user_type = "Administrator"
-    # logged_user = 'james.smith'
-    # screen_number = 8
-
     while not Quit:
         print("loop running ",screen_number)
         if screen_number == 1:

@@ -163,6 +163,7 @@ def render():
     ui.setupUi(manager_daily_detail)
     manager_daily_detail.show()
     app.exec_()
+    manager_daily_detail.close()
 
 
 if __name__ == "__main__":

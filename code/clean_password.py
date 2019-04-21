@@ -34,7 +34,7 @@ result = cursor.fetchall()
 for row in result:
     user_name,pwd = row
     pwd = hash_password(pwd)
-    sql = "update user set Password = pwd where Username = user_name;"
+    sql = "update user set Password = \'" + pwd + "\' where Username = \'" + user_name + "\';"
     cursor.execute(sql)
 connection_object.commit()
 if(connection_object.is_connected()):

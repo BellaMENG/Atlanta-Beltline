@@ -291,7 +291,7 @@ class Ui_adniministrator_manage_site(object):
             print("MySQL connection is closed")
     
     def get_managers(self):
-        query1 = "select concat(Firstname, \' \',Lastname),Username from User where Username in ( select Username from manager where Username not in (select Username from assign_to) );"
+        query1 = "select concat(Firstname, \' \',Lastname),Username from user where Username in ( select Username from manager where Username not in (select Username from assign_to) );"
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()

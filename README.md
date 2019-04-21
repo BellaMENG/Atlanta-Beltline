@@ -24,4 +24,10 @@ activate your conda environment
 run init.py file  
 </p>python init.py</p>
 
+## Error ##
+1. Expression #3 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'beltline_version2.connect.Name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+
+-mysql  SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+
+
 

@@ -374,6 +374,7 @@ def render():
     ui.setupUi(visitor_explore_site)
     visitor_explore_site.show()
     app.exec_()
+    visitor_explore_site.close()
 
 
 if __name__ == "__main__":

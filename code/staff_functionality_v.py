@@ -117,7 +117,7 @@ def render():
     ui = Ui_staff_functionality_v()
     ui.setupUi(staff_functionality_v)
     staff_functionality_v.show()
-    sys.exit(app.exec_())
+    app.exec_()
     staff_functionality_v.close()
 
 

@@ -182,9 +182,16 @@ class Ui_administrator_manage_user(object):
         else:
             print("user_login.py login() Not Connected ")
         cursor = connection_object.cursor()
-        sql = "select emails.Username, count(*) as 'Email Count', user.UserType, user.Status \
+        if user_name:
+            sql = "select emails.Username, count(*) as 'Email Count', user.UserType, user.Status \
 from emails join user on emails.Username = user.Username \
-where user.UserType like concat(\'%\',\'"+user_type +"\',\'%\') and Status like concat(\'%\',\'"+status +"\',\'%\') and user.Username like concat(\'%\',\'"+user_name +"\',\'%\')\
+where user.UserType like concat(\'%\',\'"+user_type +"\',\'%\') and Status like concat(\'%\',\'"+status +"\',\'%\') and user.Username like \'"+user_name +"\' \
+ group by emails.Username \
+order by " + order_col + " " + order + ";"
+        else:
+            sql = "select emails.Username, count(*) as 'Email Count', user.UserType, user.Status \
+from emails join user on emails.Username = user.Username \
+where user.UserType like concat(\'%\',\'"+user_type +"\',\'%\') and Status like concat(\'%\',\'"+status +"\',\'%\') \
  group by emails.Username \
 order by " + order_col + " " + order + ";"
         print(sql)
@@ -233,7 +240,7 @@ order by " + order_col + " " + order + ";"
         user_name = self.tableWidget.item(idx,1).text()
         status = self.tableWidget.item(idx,4).text()
         if op == 1:
-            if status == "Pending":
+            if status == "Pending" or status == "Declined":
                 connection_object = __main__.connection_pool.get_connection()
                 if connection_object.is_connected():
                     db_Info = connection_object.get_server_info()

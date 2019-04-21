@@ -154,6 +154,8 @@ def render():
     ui.setupUi(visitor_site_detail)
     visitor_site_detail.show()
     app.exec_()
+    visitor_site_detail.close()
+    
 
 if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()

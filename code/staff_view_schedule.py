@@ -238,6 +238,7 @@ def render():
     ui.setupUi(staff_view_schedule)
     staff_view_schedule.show()
     app.exec_()
+    staff_view_schedule.close()
 
 if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()

@@ -242,6 +242,7 @@ def render():
     ui.setupUi(visitor_visit_history)
     visitor_visit_history.show()
     app.exec_()
+    visitor_visit_history.close()
 
 if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()
