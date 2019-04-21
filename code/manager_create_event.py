@@ -157,6 +157,7 @@ class Ui_MainWindow(object):
 
         query = "select Name from site where Manager = \'" + self.user_name + "\';"
         result = self.retrieve_from_db(query)
+
         self.site_name = result[0][0]
 
         self.staffList.clicked.connect(self.selected_row)
@@ -187,13 +188,13 @@ class Ui_MainWindow(object):
 
 
     def retrieveStaff(self):
-        query1 = "select distinct concat(user.Firstname, \' \', user.Lastname) " \
+        query1 = "select distinct concat(user.Firstname, \' \', user.Lastname, ' (', user.Username, ')') " \
                  "from user join staff on user.Username = staff.Username " \
                  "where staff.Username not in (select distinct Username from assign_to);"
 
         result1 = self.retrieve_from_db(query1)
 
-        query2 = "select distinct concat(user.Firstname,\' \',user.Lastname), " \
+        query2 = "select distinct concat(user.Firstname,\' \', user.Lastname, ' (', user.Username, ')'), " \
                  "assign_to.EventName, assign_to.StartDate, event.EndDate, assign_to.SiteName " \
                  "from user join assign_to join event " \
                  "on user.Username = assign_to.Username and assign_to.EventName = event.Name " \
@@ -281,7 +282,7 @@ class Ui_MainWindow(object):
             self.msgDialog("Need to assign staff!")
             return
 
-        if (len(self.new_staff) < self.new_msr):
+        if len(self.new_staff) < self.new_msr:
             self.msgDialog("Number of staff assigned to this event cannot be fewer than the minimum requirement!")
             return
 
@@ -313,6 +314,21 @@ class Ui_MainWindow(object):
                 "\'" + str(self.new_price) + "\', \'" + str(self.new_cap) + "\', " \
                 "\'" + str(self.new_msr) + "\', \'" + self.new_des + "\');"
         self.update_db(query)
+
+        # TODO: insert into assign_to
+        for staff in self.new_staff:
+            left = 0
+            right = len(staff)
+            for i in range(len(staff)):
+                if staff[i] == '(':
+                    left = i
+                if staff[i] == ')':
+                    right = i
+            user_name = staff[left+1:right]
+            query = "insert into assign_to " \
+                    "VALUES(\'" + user_name + "\', \'" + self.new_name + "\', " \
+                    "\'" + self.new_start_date + "\', \'" + self.site_name + "\');"
+            self.update_db(query)
 
     def is_number(self, s):
         try:
