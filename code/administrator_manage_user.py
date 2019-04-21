@@ -146,7 +146,7 @@ class Ui_administrator_manage_user(object):
         order_list = ['ASC','DESC']
         self.orderComboBox.addItems(order_list)
 
-        col_list = ["user.Username","\'Email Count\'", "user.UserType", "user.UserType"]
+        col_list = ["user.Username","\'Email Count\'", "user.UserType", "user.Status"]
         self.sortByComboBox.addItems(col_list)
 
         self.tableWidget.setColumnCount(5)
