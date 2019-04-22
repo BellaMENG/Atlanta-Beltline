@@ -224,6 +224,7 @@ class Ui_MainWindow(object):
 
     def log_visit(self):
         name, start_date, site_name, tickets_re = __main__.selected_event33
+        print(__main__.selected_event33)
         # check the status of the create statement
         start_date = self.sdateEdit.date()
         end_date = self.edateEdit.date()
@@ -248,6 +249,10 @@ class Ui_MainWindow(object):
                 visit_dates.append(str(row[0]))
         if visit_date in visit_dates:
             self.msgDialog("You cannot log visit to the same event on the same date!")
+            return
+
+        if tickets_re == '0':
+            self.msgDialog("The event has been sold out!")
             return
         query = "insert into visit_event " \
                 "VALUES(\'" + self.user_name + "\', \'" + name + "\', " \
