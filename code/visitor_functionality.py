@@ -86,6 +86,10 @@ class Ui_visitor_functionality(object):
         self.view_transit_history_btn.clicked.connect(lambda:self.func(16))
         self.back_btn.clicked.connect(lambda:self.func(1))
 
+    def func(self, idx):
+        __main__.screen_number = idx
+        app.exit()
+
 def render():
     visitor_functionality = QtWidgets.QMainWindow()
     ui = Ui_visitor_functionality()
