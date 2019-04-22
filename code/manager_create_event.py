@@ -249,6 +249,10 @@ class Ui_MainWindow(object):
             self.msgDialog("All fields are required!")
             return
 
+        if not self.is_number(self.new_price):
+            self.msgDialog("Price needs to be a number!")
+            return
+
         if float(self.new_price) < 0:
             self.new_price = 0.0
         else:
@@ -258,13 +262,21 @@ class Ui_MainWindow(object):
             self.msgDialog("Capacity needs to be a number!")
             return
 
+        if not self.is_number(self.new_msr):
+            self.msgDialog("Minimum staff required needs to be a number!")
+            return
+
         self.new_cap = float(self.new_cap)
 
         if not self.new_cap.is_integer():
             self.msgDialog("Capacity needs to be an integer!")
             return
-
         self.new_cap = int(self.new_cap)
+
+        self.new_msr = float(self.new_msr)
+        if not self.new_msr.is_integer():
+            self.msgDialog("Capacity needs to be an integer!")
+            return
 
         if self.new_cap < 0:
             self.msgDialog("Capacity needs to be positive!")
