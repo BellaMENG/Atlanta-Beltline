@@ -212,7 +212,7 @@ def render():
     ui.setupUi(manager_manage_staff)
     manager_manage_staff.show()
     app.exec_()
-
+    manager_manage_staff.close()
 
 if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()

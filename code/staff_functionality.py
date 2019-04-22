@@ -89,6 +89,8 @@ def render():
     ui.setupUi(staff_functionality)
     staff_functionality.show()
     app.exec_()
+    staff_functionality.close()
+
 
 
 if __name__ == "__main__":

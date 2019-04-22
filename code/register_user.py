@@ -150,6 +150,8 @@ class Ui_register_user(object):
         lineEdit = QtWidgets.QLineEdit(self.gridLayoutWidget)
         lineEdit.setObjectName("lineEdit")
         self.gridLayout.addWidget(lineEdit, 0, 0, 1, 1)
+        self.add_btns = list()
+        self.lineEdits = list()
         self.add_btns.append(add_btn)
         self.lineEdits.append(lineEdit)
 
@@ -168,8 +170,7 @@ class Ui_register_user(object):
         self.label_2.setText(_translate("register_user", "Register User"))
         self.back_btn.setText(_translate("register_user", "Back"))
         self.register_btn.setText(_translate("register_user", "Register"))
-        self.add_btns = list()
-        self.lineEdits = list()
+        
         self.register_btn.clicked.connect(self.register)
         for btn in self.add_btns:
             btn.setText(_translate("register_visitor", "Add"))
@@ -313,11 +314,18 @@ class Ui_register_user(object):
                 return
             else:
                 emails.append(email)
-        print(email)
+        print(emails)
         if(connection_object.is_connected()):
                     cursor.close()
                     connection_object.close()
                     print("MySQL connection is closed")
+        if len(emails) == 0:
+            QMessageBox.warning(self.gridLayoutWidget , 
+                                    "Invalid Information", 
+                                    "Input at least one email", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
         ########################## store info to database##########################
         pwd = hash_password(pwd)
         query3 = "insert into user values (\'"+ user_name + "\',\'" + pwd + "\'," + "\'Pending\'" + ",\'" + fname + "\',\'" + lname + "\',\'User\');"

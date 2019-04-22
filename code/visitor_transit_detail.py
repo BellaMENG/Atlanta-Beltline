@@ -253,6 +253,7 @@ def render():
     ui.setupUi(visitor_transit_detail)
     visitor_transit_detail.show()
     app.exec_()
+    visitor_transit_detail.close()
 
 if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()

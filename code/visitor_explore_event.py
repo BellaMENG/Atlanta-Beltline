@@ -383,6 +383,7 @@ def render():
     ui.setupUi(visitor_explore_event)
     visitor_explore_event.show()
     app.exec_()
+    visitor_explore_event.close()
 
 if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()

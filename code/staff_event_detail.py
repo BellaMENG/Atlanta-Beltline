@@ -231,6 +231,7 @@ def render():
     ui.setupUi(MainWindow)
     MainWindow.show()
     app.exec_()
+    MainWindow.close()
 
 if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()

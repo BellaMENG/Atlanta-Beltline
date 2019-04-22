@@ -386,6 +386,7 @@ def render():
     ui.setupUi(manager_create_event)
     manager_create_event.show()
     app.exec_()
+    manager_create_event.close()
 
 
 if __name__ == "__main__":

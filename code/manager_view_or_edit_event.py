@@ -443,6 +443,7 @@ def render():
     ui.setupUi(manager_view_or_edit_event)
     manager_view_or_edit_event.show()
     app.exec_()
+    manager_view_or_edit_event.close()
 
 if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()

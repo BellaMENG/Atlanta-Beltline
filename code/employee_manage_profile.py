@@ -237,7 +237,27 @@ class Ui_employee_manage_profile(object):
         else:
             print("user_login.py login() Not Connected ")
         cursor = connection_object.cursor()
-        sql = "select Email from emails where Email = \'" + email+ "\' and Username != \'"+self.user_name +"\';"
+        sql = "select Email from emails where Email = \'" + email+ "\' and Username != \'"+self.user_name+"\';"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+                cursor.close()
+                connection_object.close()
+                print("MySQL connection is closed")
+        if len(result) == 0:
+            return False
+        else:
+            return True
+    
+    def myemail_exist(self,email):
+        connection_object = __main__.connection_pool.get_connection()
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("user_login.py login() Connected to MySQL server: ",db_Info)
+        else:
+            print("user_login.py login() Not Connected ")
+        cursor = connection_object.cursor()
+        sql = "select Email from emails where Email = \'" + email+ "\' and Username = \'"+self.user_name+"\';"
         cursor.execute(sql)
         result = cursor.fetchall()
         if(connection_object.is_connected()):
@@ -257,7 +277,8 @@ class Ui_employee_manage_profile(object):
             if not email:
                 continue
             else:
-                if isValidEmail(email) and not self.email_exist(email):
+                if isValidEmail(email) or not self.email_exist(email):
+                    email_count += 1
                     email_list.append(email)
                 else:
                     QMessageBox.warning(self.label, 
@@ -265,14 +286,24 @@ class Ui_employee_manage_profile(object):
                                     "Email Exists or Invalid!", 
                                     QMessageBox.Yes, 
                                     QMessageBox.Yes)
-
+        if email_count == 0:
+            QMessageBox.warning(self.gridLayoutWidget , 
+                                    "Invalid Information", 
+                                    "Input at least one email", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()
             print("user_login.py login() Connected to MySQL server: ",db_Info)
         else:
             print("user_login.py login() Not Connected ")
+        
         cursor = connection_object.cursor()
+        sql = "delete from emails where Username = \'" + self.user_name + "\';"
+        cursor.execute(sql)
+        connection_object.commit()
         for e in email_list:
             sql = "insert into emails values (\'" + self.user_name + "\', \'" + e + "\');"
             cursor.execute(sql)
@@ -286,7 +317,7 @@ class Ui_employee_manage_profile(object):
     def initInfo(self):
         #
         _translate = QtCore.QCoreApplication.translate
-        query1 = "select e.Username, e.EmployeeID, e.Phone, e.Address, e.City, e.State, e.Zipcode, u.Firstname, u.Lastname from employee as e join user as u on e.Username = u.Username where e.Username = \'"+ self.user_name + "\';"
+        query1 = "select e.Username, e.EmployeeID, e.Phone, e.Address, e.City, e.State, e.Zipcode, u.Firstname, u.Lastname, u.Status from employee as e join user as u on e.Username = u.Username where e.Username = \'"+ self.user_name + "\';"
         connection_object = __main__.connection_pool.get_connection()
         if connection_object.is_connected():
             db_Info = connection_object.get_server_info()
@@ -297,7 +328,7 @@ class Ui_employee_manage_profile(object):
         print(query1)
         cursor.execute(query1)
         result = cursor.fetchall()
-        user_name,employee_id,phone,address,city,state,zipcode,first_name,last_name = result[0]
+        user_name,employee_id,phone,address,city,state,zipcode,first_name,last_name,status= result[0]
         query2 = "select SiteName from assign_to where Username = \'" + user_name + "\';"
         cursor.execute(query2)
         result = cursor.fetchall()
@@ -308,7 +339,10 @@ class Ui_employee_manage_profile(object):
         #first_name,last_name,user_name,site_name,employee_id,phone,address = ['Clara','Wilson','cwison','Inman Park','123456789','123-123-1234','100 East Main Street']
         self.user_name_label.setText(_translate("employee_manage_profile", user_name))
         self.site_name_label.setText(_translate("employee_manage_profile", site_name))
-        self.employee_id_label.setText(_translate("employee_manage_profile", employee_id))
+        if status == "Approved":
+            self.employee_id_label.setText(_translate("employee_manage_profile", employee_id))
+        else:
+            self.employee_id_label.setText(_translate("employee_manage_profile", "Not assigned"))
         self.address_label.setText(_translate("employee_manage_profile", address + ' , ' + city + ' , ' + state + " "+ zipcode))
         self.first_name_lineEdit.setText(first_name)
         self.last_name_lineEdit.setText(last_name)
@@ -336,7 +370,7 @@ class Ui_employee_manage_profile(object):
         else:
             print("user_login.py login() Not Connected ")
         cursor = connection_object.cursor()
-        if not isValidPhone(phone):
+        if not isValidPhone(phone) or self.phoneExist(phone):
             QMessageBox.warning(self.centralwidget, 
                                     "Invalid Information", 
                                     "Invalid Phone Number: %s"%(phone), 
@@ -427,6 +461,26 @@ class Ui_employee_manage_profile(object):
             self.func(9)
         elif __main__.user_type == "Administrator":
             self.func(8)
+    
+    def phoneExist(self,phone):
+        connection_object = __main__.connection_pool.get_connection()
+        sql = "select Phone from employee where Phone = \'"+ phone + "\' and Username != \'" + self.user_name + "\';"
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("register_user.py Connected to MySQL server: ",db_Info)
+        else:
+            print("register_user.py  Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if len(result) == 0:
+            return False
+        else:
+            return True
         
 
 

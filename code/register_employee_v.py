@@ -15,8 +15,6 @@ import sys,uuid
 app = QtWidgets.QApplication(sys.argv)
 
 class Ui_register_employee_v(object):
-    add_btns = list()
-    lineEdits = list()
 
     def setupUi(self, register_employee):
         register_employee.setObjectName("register_employee")
@@ -220,6 +218,8 @@ class Ui_register_employee_v(object):
         lineEdit = QtWidgets.QLineEdit(self.gridLayoutWidget)
         lineEdit.setObjectName("lineEdit")
         self.gridLayout.addWidget(lineEdit, 0, 0, 1, 1)
+        self.add_btns = list()
+        self.lineEdits = list()
         self.add_btns.append(add_btn)
         self.lineEdits.append(lineEdit)
 
@@ -248,6 +248,7 @@ class Ui_register_employee_v(object):
         self.state_input.addItems(state_list)
         user_type_list = ['Manager','Staff']
         self.userTypeComboBox.addItems(user_type_list)
+        
         for btn in self.add_btns:
             btn.setText(_translate("register_employee", "Add"))
             btn.clicked.connect(self.add_email_input)
@@ -352,10 +353,10 @@ class Ui_register_employee_v(object):
                                     QMessageBox.Yes)
             return
 
-        if not isValidPhone(phone):
+        if not isValidPhone(phone) or self.phoneExist(phone):
                 QMessageBox.warning(self.gridLayoutWidget , 
                                     "Invalid Information", 
-                                    "Invalid Phone Number: %s"%(phone), 
+                                    "Invalid Phone Number or Phone Number Exists: %s"%(phone), 
                                     QMessageBox.Yes, 
                                     QMessageBox.Yes)
                 return 
@@ -414,6 +415,13 @@ class Ui_register_employee_v(object):
                     cursor.close()
                     connection_object.close()
                     print("MySQL connection is closed")
+        if len(emails) == 0:
+            QMessageBox.warning(self.gridLayoutWidget , 
+                                    "Invalid Information", 
+                                    "Input at least one email", 
+                                    QMessageBox.Yes, 
+                                    QMessageBox.Yes)
+            return
          ########################## store info to database##########################
         pwd = hash_password(pwd)
         query3 = "insert into user values (\'"+ user_name + "\',\'" + pwd + "\'," + "\'Pending\'" + ",\'" + fname + "\',\'" + lname + "\',\'"+ user_type+"\');"
@@ -458,6 +466,26 @@ class Ui_register_employee_v(object):
         __main__.screen_number = idx
         app.exit()
 
+    def phoneExist(self,phone):
+        connection_object = __main__.connection_pool.get_connection()
+        sql = "select Phone from employee where Phone = \'"+ phone + "\'"
+        if connection_object.is_connected():
+            db_Info = connection_object.get_server_info()
+            print("register_user.py Connected to MySQL server: ",db_Info)
+        else:
+            print("register_user.py  Not Connected ")
+        cursor = connection_object.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        if(connection_object.is_connected()):
+            cursor.close()
+            connection_object.close()
+            print("MySQL connection is closed")
+        if len(result) == 0:
+            return False
+        else:
+            return True
+
 def render():
     register_employee = QtWidgets.QMainWindow()
     ui = Ui_register_employee_v()
@@ -465,6 +493,8 @@ def render():
     register_employee.show()
     app.exec_()
     register_employee.close()
+
+
 
 
 

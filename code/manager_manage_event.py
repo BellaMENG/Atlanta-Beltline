@@ -448,6 +448,7 @@ def render():
     ui.setupUi(manager_manage_event)
     manager_manage_event.show()
     app.exec_()
+    manager_manage_event.close()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

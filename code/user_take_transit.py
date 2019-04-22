@@ -344,6 +344,7 @@ def render():
     ui.setupUi(user_take_transit)
     user_take_transit.show()
     app.exec_()
+    user_take_transit.close()
 
 if __name__ == "__main__":
     import sys
