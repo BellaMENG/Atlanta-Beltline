@@ -240,11 +240,9 @@ class Ui_MainWindow(object):
         self.capacityContent.setText(str(self.eventCapacity))
         self.descriptionEdit.setPlainText(str(self.eventDes))
 
-        staff = self.retrieveStaff()
-        self.staffRetrieved = list()
-        for item in staff:
-            self.staffRetrieved.append(item[0])
-            self.staffAssignedEdit.addItem(QListWidgetItem(item[0]))
+        self.staffRetrieved = self.retrieveStaff()
+        for item in self.staffRetrieved:
+            self.staffAssignedEdit.addItem(QListWidgetItem(item))
 
         self.newStaff = list()
         self.staffAssignedEdit.clicked.connect(self.selected_rows)
@@ -309,6 +307,7 @@ class Ui_MainWindow(object):
         return result
 
     def retrieveStaff(self):
+        staff_list = list()
         eventName, eventSDate, eventSiteName = __main__.selected_event25
         query1 = "select concat(Firstname, \' \', Lastname, \' (\', user.Username, \')\') as \'Staff\'" \
                  "from user join assign_to " \
@@ -318,7 +317,39 @@ class Ui_MainWindow(object):
                  + "\' and assign_to.SiteName = \'" + eventSiteName + "\'"
 
         result = self.retrieve_from_db(query1)
-        return result
+        for row in result:
+            staff_list.append(row[0])
+
+        query = "select EndDate from event " \
+                "where Name = \'" + eventName + "\' " \
+                "and StartDate = \'" + eventSDate + "\' " \
+                "and SiteName = \'" + eventSiteName + "\';"
+        result = self.retrieve_from_db(query)
+        eventEDate = str(result[0][0])
+
+        query = "select concat(Firstname, ' ', Lastname, ' (', Username, ')') " \
+                "from user where Username in (select distinct Username " \
+                "from staff where Username not in (select distinct Username from assign_to));"
+        print(query)
+        result = self.retrieve_from_db(query)
+        for row in result:
+            staff_list.append(row[0])
+
+        query = "select concat(Firstname, ' ', Lastname, ' (', Username, ')') " \
+                "from user where Username in (select distinct Username " \
+                "from assign_to where Username not in (select distinct Username " \
+                "from assign_to where (EventName, StartDate, SiteName) not in " \
+                "(select Name, StartDate, SiteName from event " \
+                "where StartDate > \'" + eventEDate + "\' " \
+                "or EndDate < \'" + eventSDate + "\')));"
+        print(query)
+        result = self.retrieve_from_db(query)
+        for row in result:
+            staff_list.append(row[0])
+
+        staff_list = set(staff_list)
+        staff_list = list(staff_list)
+        return staff_list
 
     def selected_rows(self):
         selected_item = self.staffAssignedEdit.selectedItems()
